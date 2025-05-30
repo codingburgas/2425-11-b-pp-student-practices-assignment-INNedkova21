@@ -79,3 +79,22 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 *.pyc
+
+# === Project specific additions ===
+
+# Ignore all .idea folders anywhere in the project (including subfolders)
+**/.idea/
+
+# Ignore all .iml files anywhere in the project
+**/*.iml
+
+# Ignore specific config files inside any .idea folder
+**/.idea/misc.xml
+**/.idea/modules.xml
+**/.idea/vcs.xml
+
+# Ignore inspection profiles settings folder inside .idea
+**/.idea/inspectionProfiles/
+
+# Ignore .gitignore files inside .idea folders
+**/.idea/.gitignore
