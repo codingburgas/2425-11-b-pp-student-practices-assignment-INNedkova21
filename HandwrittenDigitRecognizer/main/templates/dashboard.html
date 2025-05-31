@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+  <div class="text-center">
+    <h1 class="mb-4 text-primary">Handwritten Digit Recognizer</h1>
+    <p class="mb-4 text-secondary">Проект с невронна мрежа за разпознаване на ръкописни цифри</p>
+    <div class="d-grid gap-2 col-6 mx-auto">
+      <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary btn-lg">Вход</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Регистрация</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
