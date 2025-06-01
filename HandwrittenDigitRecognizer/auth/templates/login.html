@@ -1,18 +1,17 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}Вход{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-  <h2 class="text-center mb-4">Вход</h2>
-  <form method="POST">
-    {{ form.hidden_tag() }}
-    <div class="mb-3">
-      {{ form.email.label(class="form-label") }}
-      {{ form.email(class="form-control") }}
-    </div>
-    <div class="mb-3">
-      {{ form.password.label(class="form-label") }}
-      {{ form.password(class="form-control") }}
-    </div>
-    {{ form.submit(class="btn btn-primary w-100") }}
+<div class="form-container">
+  <form method="POST" action="{{ url_for('auth.login') }}">
+      <label for="email">Имейл:</label>
+      <input type="email" id="email" name="email" required />
+
+      <label for="password">Парола:</label>
+      <input type="password" id="password" name="password" required />
+
+      <button type="submit">Вход</button>
   </form>
 </div>
 {% endblock %}

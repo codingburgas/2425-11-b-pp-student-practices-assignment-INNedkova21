@@ -1,12 +1,26 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Digit Recognizer</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Handwritten Digit Recognizer{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
 </head>
-<body style="background-color: #f3f4f6; color: #111827;">
-  {% block content %}{% endblock %}
+<body>
+    <header>
+        <h1>Handwritten Digit Recognizer</h1>
+        {% if not (request.endpoint == 'auth.login' or request.endpoint == 'auth.register') %}
+        <nav>
+            <a href="{{ url_for('main.index') }}">Начало</a>
+            <a href="{{ url_for('auth.login') }}">Вход</a>
+            <a href="{{ url_for('auth.register') }}">Регистрация</a>
+        </nav>
+        {% endif %}
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
 </body>
 </html>
