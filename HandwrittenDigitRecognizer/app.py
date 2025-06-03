@@ -3,7 +3,7 @@ from config import Config
 from extensions import db, login_manager
 from main.routes import main
 from auth import auth
-from models.user import User  # Импортиране след инициализацията на db и login_manager
+from models.user import User
 
 def create_app():
     app = Flask(__name__)
