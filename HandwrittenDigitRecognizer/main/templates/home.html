@@ -84,20 +84,30 @@
     }
   </style>
 </head>
+<!--<body>-->
+<!--  <div class="card">-->
+<!--    <h1>Handwritten Digit Recognizer</h1>-->
+<!--    <p>Начертай цифра в полето и невронната мрежа ще я разпознае.</p>-->
+
+<!--    <canvas id="digit-canvas" width="280" height="280"></canvas>-->
+
+<!--    <div>-->
+<!--      <button class="button">Разпознай</button>-->
+<!--      <button class="button" style="background-color: var(&#45;&#45;color-error);">Изчисти</button>-->
+<!--    </div>-->
+
+<!--    <p class="message-success">Разпознато: 7</p>-->
+<!--    &lt;!&ndash; <p class="message-error">Невалиден вход. Опитай отново.</p> &ndash;&gt;-->
+<!--  </div>-->
+<!--</body>-->
+
 <body>
-  <div class="card">
-    <h1>Handwritten Digit Recognizer</h1>
-    <p>Начертай цифра в полето и невронната мрежа ще я разпознае.</p>
+    <h1>Как мога да ти помогна?<br>Качи .png снимка или нарисувай цифра?</h1>
 
-    <canvas id="digit-canvas" width="280" height="280"></canvas>
-
-    <div>
-      <button class="button">Разпознай</button>
-      <button class="button" style="background-color: var(--color-error);">Изчисти</button>
+    <div class="buttons-container">
+        <a href="{{ url_for('main.upload') }}" class="button">Качи PNG</a>
+        <a href="{{ url_for('main.draw') }}" class="button">Нарисувай цифра</a>
     </div>
-
-    <p class="message-success">Разпознато: 7</p>
-    <!-- <p class="message-error">Невалиден вход. Опитай отново.</p> -->
-  </div>
 </body>
+
 </html>

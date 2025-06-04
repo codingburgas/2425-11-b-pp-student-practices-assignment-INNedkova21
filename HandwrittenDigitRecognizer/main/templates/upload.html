@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Качване на .png</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="form-container">
+        <h1>Качи изображение</h1>
+        <form method="POST" action="{{ url_for('main.upload') }}" enctype="multipart/form-data">
+            <label for="image">Избери .png файл:</label>
+            <input type="file" id="image" name="image" accept=".png" required>
+            <button type="submit">Разпознай</button>
+        </form>
+    </div>
+</body>
+</html>
