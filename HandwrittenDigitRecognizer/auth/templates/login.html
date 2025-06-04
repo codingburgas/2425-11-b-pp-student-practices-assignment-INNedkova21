@@ -1,17 +1,58 @@
 {% extends "base.html" %}
+{% set show_navbar = False %}
 
-{% block title %}Вход{% endblock %}
+{% block title %} Вход {% endblock %}
 
 {% block content %}
-<div class="form-container">
-  <form method="POST" action="{{ url_for('auth.login') }}">
-      <label for="email">Имейл:</label>
-      <input type="email" id="email" name="email" required />
+  <div class="mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <h2 class="text-center">Вход</h2>
 
-      <label for="password">Парола:</label>
-      <input type="password" id="password" name="password" required />
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          {{ form.hidden_tag() }}
 
-      <button type="submit">Вход</button>
-  </form>
-</div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Имейл</label>
+            {{ form.email(class="form-control", id="email", placeholder="Въведете имейл") }}
+            {% if form.email.errors %}
+              <div class="text-danger">
+                {% for error in form.email.errors %}
+                  <small>{{ error }}</small><br>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="password" class="form-label">Парола</label>
+            {{ form.password(class="form-control", id="password", placeholder="Въведете парола") }}
+            {% if form.password.errors %}
+              <div class="text-danger">
+                {% for error in form.password.errors %}
+                  <small>{{ error }}</small><br>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3 text-center">
+            {{ form.submit(class="btn btn-tangerine") }}
+          </div>
+
+          <p class="text-center">Нямате акаунт? <a href="{{ url_for('auth.register') }}">Регистрирайте се.</a></p>
+        </form>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} mt-3 text-center">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  </div>
 {% endblock %}

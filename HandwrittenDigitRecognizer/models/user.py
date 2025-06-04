@@ -11,8 +11,6 @@ class User(UserMixin, db.Model):
     LastName = db.Column(db.String(50), nullable=False)
     Email = db.Column(db.String(120), unique=True, nullable=False)
     Password = db.Column(db.String(120), nullable=False)
-    ConfirmPassword = db.Column(db.String(120), nullable=False)
-    PasswordHash = db.Column(db.String(128), nullable=False)
 
     def set_password(self, password):
         self.PasswordHash = generate_password_hash(password)

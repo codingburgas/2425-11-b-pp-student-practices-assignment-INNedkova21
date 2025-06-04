@@ -1,11 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired, Email, Length
+from wtforms.fields.simple import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Email, EqualTo
+
 
 class RegisterForm(FlaskForm):
-    first_name = StringField('Име:', validators=[DataRequired()])
-    last_name = StringField('Фамилия:', validators=[DataRequired()])
-    email = StringField('Имейл:', validators=[DataRequired(), Email()])
-    password = PasswordField('Парола:', validators=[DataRequired(), Length(min=6)])
-    confirm_password = PasswordField()
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name = StringField('Last Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Парола', validators=[DataRequired()])
+    confirm_password = PasswordField('Потвърдете паролата', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Регистрация')
