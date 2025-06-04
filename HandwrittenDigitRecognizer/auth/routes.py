@@ -23,11 +23,14 @@ def login():
         password = request.form['password']
 
         user = User.query.filter_by(Email=email).first()
-        if user and check_password_hash(user.password, form.password.data):
+        if user and check_password_hash(user.Password, form.password.data):
+            if user:
+                print(f"Password check: {check_password_hash(user.Password, password)}")
+
             login_user(user)
 
-            session['first_name'] = user.first_name
-            session['last_name'] = user.last_name
+            session['first_name'] = user.FirstName
+            session['last_name'] = user.LastName
 
             flash('Успешно влизане!', 'success')
             return redirect(url_for('main.home'))

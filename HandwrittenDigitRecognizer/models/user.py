@@ -13,10 +13,13 @@ class User(UserMixin, db.Model):
     Password = db.Column(db.String(120), nullable=False)
 
     def set_password(self, password):
-        self.PasswordHash = generate_password_hash(password)
+        self.Password = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.PasswordHash, password)
+        return check_password_hash(self.Password, password)
+
+    def get_id(self):
+        return str(self.ID)
 
     def __repr__(self):
         return f'<User {self.Email}>'
