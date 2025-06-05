@@ -1,26 +1,149 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}Handwritten Digit Recognizer{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Handwritten Digit Recognizer{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9fafb;
+      color: #1f2937;
+      padding-top: 60px;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background-color: #3b82f6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 15px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .logo-link {
+      text-decoration: none;
+      color: white;
+      font-size: 1.5rem;
+      font-weight: bold;
+      user-select: none;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-right: 10px;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    nav a:hover {
+      color: #dbeafe;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      cursor: pointer;
+      width: 25px;
+      height: 20px;
+      justify-content: space-between;
+      margin-left: 10px;
+    }
+
+    .hamburger span {
+      display: block;
+      height: 3px;
+      background: white;
+      border-radius: 2px;
+    }
+
+    @media (max-width: 768px) {
+      nav {
+        position: fixed;
+        top: 60px;
+        right: 0;
+        background-color: #3b82f6;
+        height: calc(100% - 60px);
+        width: 200px;
+        flex-direction: column;
+        padding: 20px;
+        gap: 20px;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+        z-index: 999;
+      }
+
+      nav.active {
+        transform: translateX(0);
+      }
+
+      .hamburger {
+        display: flex;
+        margin-right: 20px;
+      }
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Handwritten Digit Recognizer</h1>
-        {% if not (request.endpoint == 'auth.login' or request.endpoint == 'auth.register') %}
-        <nav>
-            <a href="{{ url_for('main.index') }}">Начало</a>
-            <a href="{{ url_for('auth.login') }}">Вход</a>
-            <a href="{{ url_for('auth.register') }}">Регистрация</a>
-        </nav>
-        {% endif %}
-    </header>
+  {% if not (request.endpoint == 'auth.login' or request.endpoint == 'auth.register') %}
+  <header>
+    <a href="{{ url_for('main.home') }}" class="logo-link">Handwritten Digit Recognizer</a>
 
-    <main>
-        {% block content %}
-        {% endblock %}
-    </main>
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <nav id="nav-menu">
+      <a href="{{ url_for('main.home') }}">Начало</a>
+      <a href="{{ url_for('main.upload') }}">Качи PNG</a>
+      <a href="{{ url_for('main.draw') }}">Нарисувай цифра</a>
+      <a href="{{ url_for('auth.logout') }}">Изход</a>
+    </nav>
+  </header>
+  {% endif %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.getElementById('nav-menu');
+
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+    });
+
+    // Close menu on link click (optional)
+    navMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+      });
+    });
+  </script>
 </body>
 </html>
