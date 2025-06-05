@@ -6,10 +6,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+  <div class="index-content">
     <h1>Handwritten Digit Recognizer</h1>
     <div class="buttons-container">
         <a href="{{ url_for('auth.login') }}" class="button">Вход</a>
         <a href="{{ url_for('auth.register') }}" class="button">Регистрация</a>
     </div>
+  </div>
 </body>
 </html>

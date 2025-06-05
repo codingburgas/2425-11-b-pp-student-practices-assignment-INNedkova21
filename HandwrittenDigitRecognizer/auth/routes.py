@@ -1,7 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request, Blueprint, session
 from flask_login import login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-
 from . import auth
 from HandwrittenDigitRecognizer.models.user import User
 from HandwrittenDigitRecognizer.app import db
