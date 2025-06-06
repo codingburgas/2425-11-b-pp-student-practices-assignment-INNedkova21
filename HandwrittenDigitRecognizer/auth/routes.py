@@ -89,4 +89,4 @@ def logout():
     logout_user()
     session.clear()
     flash('Успешно излязохте от системата.', 'success')
-    return redirect(url_for('main.dashboard'))
+    return redirect(url_for('main.index'))
