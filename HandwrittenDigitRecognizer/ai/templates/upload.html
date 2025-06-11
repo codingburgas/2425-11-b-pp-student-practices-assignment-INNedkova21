@@ -5,10 +5,27 @@
 {% block content %}
 <div class="form-container upload-form">
     <h1>Качи изображение</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
     <form method="POST" action="{{ url_for('ai.upload') }}" enctype="multipart/form-data">
         <label for="image">Избери .png файл:</label>
         <input type="file" id="image" name="image" accept=".png" required>
         <button type="submit" class="button">Разпознай</button>
     </form>
+
+{% if prediction is not none %}
+    <div class="result">
+        <h2>Разпознато число: {{ prediction }}</h2>
+        {% if confidence %}
+            <p>Увереност: {{ confidence }}%</p>
+        {% endif %}
+    </div>
+{% endif %}
 </div>
 {% endblock %}
