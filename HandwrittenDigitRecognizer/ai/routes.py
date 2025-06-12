@@ -5,10 +5,16 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 from scipy.ndimage import center_of_mass, shift, binary_dilation
 from . import ai
+import datetime
+from flask import send_from_directory, abort
+from flask_login import current_user, login_required
 import pickle
 
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 model_path = os.path.join(project_root, 'ai', 'model', 'mnist_model.pkl')
+
+upload_folder = os.path.join(project_root, 'uploads')
+os.makedirs(upload_folder, exist_ok=True)
 
 with open(model_path, 'rb') as f:
     W1, b1, W2, b2, W3, b3 = pickle.load(f)
@@ -37,10 +43,13 @@ def upload():
         if file and file.filename.lower().endswith('.png'):
             filename = secure_filename(file.filename)
 
-            upload_folder = os.path.join(project_root, 'uploads')
-            os.makedirs(upload_folder, exist_ok=True)
+            # upload_folder = os.path.join(project_root, 'uploads')
+            # os.makedirs(upload_folder, exist_ok=True)
 
-            save_path = os.path.join(upload_folder, filename)
+            user_folder = os.path.join(upload_folder, str(current_user.ID))
+            os.makedirs(user_folder, exist_ok=True)
+
+            save_path = os.path.join(user_folder, filename)
             file.save(save_path)
 
             image = Image.open(save_path).convert('L')
@@ -104,3 +113,44 @@ def draw():
         else:
             flash("Моля, въведете валидна цифра (0-9).", "danger")
     return render_template("draw.html")
+
+
+@ai.route('/history')
+@login_required
+def history():
+    user_folder = os.path.join(upload_folder, str(current_user.ID))
+    images = []
+
+    if os.path.exists(user_folder):
+        for filename in os.listdir(user_folder):
+            filepath = os.path.join(user_folder, filename)
+            if os.path.isfile(filepath):
+                upload_time_str = datetime.datetime.fromtimestamp(os.path.getctime(filepath)).strftime('%Y-%m-%d %H:%M')
+                upload_time_dt = datetime.datetime.strptime(upload_time_str, '%Y-%m-%d %H:%M')
+                images.append({'filename': filename, 'upload_time': upload_time_str, 'upload_time_dt': upload_time_dt})
+
+        # Сортиране по дата, най-новите снимки първи
+        images.sort(key=lambda x: x['upload_time_dt'], reverse=True)
+
+    return render_template('history.html', images=images)
+
+
+@ai.route('/download/<filename>')
+@login_required
+def download_image(filename):
+    user_folder = os.path.join(upload_folder, str(current_user.ID))
+    filepath = os.path.join(user_folder, filename)
+    if os.path.exists(filepath):
+        return send_from_directory(user_folder, filename, as_attachment=True)
+    else:
+        abort(404)
+
+
+@ai.route('/delete/<filename>', methods=['POST'])
+@login_required
+def delete_image(filename):
+    user_folder = os.path.join(upload_folder, str(current_user.ID))
+    filepath = os.path.join(user_folder, filename)
+    if os.path.exists(filepath):
+        os.remove(filepath)
+    return redirect(url_for('ai.history'))
