@@ -3,6 +3,7 @@ import numpy as np
 from flask import render_template, request, flash, redirect, url_for
 from werkzeug.utils import secure_filename
 from PIL import Image
+from scipy.ndimage import center_of_mass, shift, binary_dilation
 from . import ai
 import pickle
 
@@ -12,7 +13,8 @@ model_path = os.path.join(project_root, 'ai', 'model', 'mnist_model.pkl')
 with open(model_path, 'rb') as f:
     W1, b1, W2, b2, W3, b3 = pickle.load(f)
 
-def leaky_relu(x, alpha=0.01): return np.where(x > 0, x, alpha * x)
+def leaky_relu(x, alpha=0.01):
+    return np.where(x > 0, x, alpha * x)
 
 def predict_digit(image_array_flat):
     z1 = image_array_flat @ W1 + b1
@@ -20,47 +22,77 @@ def predict_digit(image_array_flat):
     z2 = a1 @ W2 + b2
     a2 = leaky_relu(z2)
     z3 = a2 @ W3 + b3
-    e_x = np.exp(z3 - np.max(z3))
-    softmax = e_x / e_x.sum()
+    e_x = np.exp(z3 - np.max(z3, axis=1, keepdims=True))
+    softmax = e_x / np.sum(e_x, axis=1, keepdims=True)
     return int(np.argmax(softmax)), float(np.max(softmax))
 
 @ai.route('/upload', methods=['GET', 'POST'])
 def upload():
     prediction = None
     confidence = None
+    error = None
 
     if request.method == 'POST':
-        file = request.files['image']
-        if file and file.filename.endswith('.png'):
+        file = request.files.get('image')
+        if file and file.filename.lower().endswith('.png'):
             filename = secure_filename(file.filename)
-            filepath = os.path.join('uploads', filename)
-            file.save(filepath)
 
-            image = Image.open(filepath).convert('L')  # Grayscale
+            upload_folder = os.path.join(project_root, 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
 
-            image_array = np.array(image)
-            non_empty_columns = np.where(image_array.min(axis=0) < 255)[0]
-            non_empty_rows = np.where(image_array.min(axis=1) < 255)[0]
-            if non_empty_rows.any() and non_empty_columns.any():
-                cropBox = (min(non_empty_columns), min(non_empty_rows),
-                           max(non_empty_columns), max(non_empty_rows))
-                image = image.crop(cropBox)
+            save_path = os.path.join(upload_folder, filename)
+            file.save(save_path)
 
-            image = image.resize((20, 20), Image.Resampling.LANCZOS)
-            new_image = Image.new('L', (28, 28), 255)
-            new_image.paste(image, ((28 - 20) // 2, (28 - 20) // 2))
+            image = Image.open(save_path).convert('L')
+            image_array = 255 - np.array(image)
 
-            image_array = np.array(new_image).astype('float32')
-            image_array = 255 - image_array  # инверсия
-            image_array /= 255.0
-            image_array = image_array.reshape(1, 784)
+            image_array = (image_array > 50).astype(np.uint8)
 
-            prediction, conf = predict_digit(image_array)
+            image_array = binary_dilation(image_array, iterations=1).astype(np.uint8) * 255
+
+            coords = np.argwhere(image_array)
+            if coords.size == 0:
+                error = "No digit found in the image."
+                return render_template('upload.html', prediction=None, confidence=None, error=error)
+
+            y0, x0 = coords.min(axis=0)
+            y1, x1 = coords.max(axis=0)
+
+            margin = 20
+            y0 = max(0, y0 - margin)
+            x0 = max(0, x0 - margin)
+            y1 = min(image_array.shape[0], y1 + margin)
+            x1 = min(image_array.shape[1], x1 + margin)
+
+            cropped = image_array[y0:y1, x0:x1]
+
+            pil_cropped = Image.fromarray(cropped)
+            pil_resized = pil_cropped.resize((20, 20), Image.Resampling.LANCZOS)
+            resized_arr = np.array(pil_resized)
+
+            canvas = np.zeros((28, 28), dtype=np.uint8)
+            canvas[4:24, 4:24] = resized_arr
+
+            cy, cx = center_of_mass(canvas)
+            rows, cols = canvas.shape
+            shiftx = np.round(cols / 2 - cx).astype(int)
+            shifty = np.round(rows / 2 - cy).astype(int)
+
+            final_img = shift(canvas, shift=[shifty, shiftx])
+
+            final_img = final_img / 255.0
+            final_img = final_img.reshape(1, 784)
+
+            prediction, conf = predict_digit(final_img)
             confidence = round(conf * 100, 2)
 
-            new_image.save(filepath)
+            debug_img = Image.fromarray((255 - final_img.reshape(28,28)*255).astype(np.uint8))
+            debug_img.save(save_path)
 
-    return render_template('upload.html', prediction=prediction, confidence=confidence)
+        else:
+            error = "Please upload a valid PNG image."
+
+    return render_template('upload.html', prediction=prediction, confidence=confidence, error=error)
 
 @ai.route('/draw', methods=['GET', 'POST'])
 def draw():
