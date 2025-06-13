@@ -6,7 +6,7 @@ from HandwrittenDigitRecognizer.models.user import User
 from HandwrittenDigitRecognizer.app import db
 from .forms.login_form import LoginForm
 from .forms.register_form import RegisterForm
-
+from HandwrittenDigitRecognizer.email import send_confirmation_email, confirm_token  # ← добавено
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -23,11 +23,11 @@ def login():
 
         user = User.query.filter_by(Email=email).first()
         if user and check_password_hash(user.Password, form.password.data):
-            if user:
-                print(f"Password check: {check_password_hash(user.Password, password)}")
+            if not user.Confirmed:  # 🔒 проверка за потвърден имейл
+                flash('Моля, потвърдете своя имейл адрес преди да влезете.', 'warning')
+                return redirect(url_for('auth.login'))
 
             login_user(user)
-
             session['first_name'] = user.FirstName
             session['last_name'] = user.LastName
 
@@ -35,10 +35,7 @@ def login():
             return redirect(url_for('main.home'))
         else:
             flash('Грешен имейл или парола', 'danger')
-    else:
-        print(form.errors)
     return render_template('login.html', form=form)
-
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
@@ -72,13 +69,17 @@ def register():
             LastName=last_name,
             Email=email,
             Password=hashed_password,
-            Role=role
+            Role=role,
+            Confirmed=False
         )
 
         try:
             db.session.add(new_user)
             db.session.commit()
-            flash("Регистрацията беше успешна! Можете да влезете.", "success")
+
+            send_confirmation_email(new_user.Email)
+
+            flash("Регистрацията беше успешна! Провери имейла си за потвърждение.", "info")
             return redirect(url_for('auth.login'))
         except Exception as e:
             db.session.rollback()
@@ -86,6 +87,22 @@ def register():
             flash("Възникна грешка при регистрацията. Опитайте отново.", "danger")
 
     return render_template("register.html", form=form)
+
+@auth.route('/confirm/<token>')
+def confirm_email(token):
+    email = confirm_token(token)
+    if not email:
+        flash('Линкът е невалиден или е изтекъл.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    user = User.query.filter_by(Email=email).first_or_404()
+    if user.Confirmed:
+        flash('Имейлът вече е потвърден.', 'info')
+    else:
+        user.Confirmed = True
+        db.session.commit()
+        flash('Имейлът беше успешно потвърден!', 'success')
+    return redirect(url_for('auth.login'))
 
 @auth.route('/logout')
 def logout():
