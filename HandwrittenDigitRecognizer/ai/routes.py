@@ -10,6 +10,9 @@ from flask import send_from_directory, abort
 from flask_login import current_user, login_required
 import pickle
 
+from ..extensions import db
+from ..models.user import User
+
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 model_path = os.path.join(project_root, 'ai', 'model', 'mnist_model.pkl')
 
@@ -43,9 +46,6 @@ def upload():
         file = request.files.get('image')
         if file and file.filename.lower().endswith('.png'):
             filename = secure_filename(file.filename)
-
-            # upload_folder = os.path.join(project_root, 'uploads')
-            # os.makedirs(upload_folder, exist_ok=True)
 
             user_folder = os.path.join(upload_folder, str(current_user.ID))
             os.makedirs(user_folder, exist_ok=True)
@@ -120,20 +120,48 @@ def draw():
 @ai.route('/history')
 @login_required
 def history():
-    user_folder = os.path.join(upload_folder, str(current_user.ID))
     images = []
 
-    if os.path.exists(user_folder):
-        for filename in os.listdir(user_folder):
-            filepath = os.path.join(user_folder, filename)
-            if os.path.isfile(filepath):
-                upload_time_str = datetime.datetime.fromtimestamp(os.path.getctime(filepath)).strftime('%Y-%m-%d %H:%M')
-                upload_time_dt = datetime.datetime.strptime(upload_time_str, '%Y-%m-%d %H:%M')
-                images.append({'filename': filename, 'upload_time': upload_time_str, 'upload_time_dt': upload_time_dt})
+    if current_user.Role == 'Administrator':
+        for user_folder_name in os.listdir(upload_folder):
+            user_folder_path = os.path.join(upload_folder, user_folder_name)
+            if os.path.isdir(user_folder_path):
+                user = User.query.filter_by(ID=int(user_folder_name)).first()
+                author_name = f"{user.FirstName} {user.LastName}" if user else "Unknown"
+                user_id = user.ID if user else None
 
-        # Сортиране по дата, най-новите снимки първи
-        images.sort(key=lambda x: x['upload_time_dt'], reverse=True)
+                for filename in os.listdir(user_folder_path):
+                    filepath = os.path.join(user_folder_path, filename)
+                    if os.path.isfile(filepath):
+                        upload_time_str = datetime.datetime.fromtimestamp(os.path.getctime(filepath)).strftime('%Y-%m-%d %H:%M')
+                        upload_time_dt = datetime.datetime.strptime(upload_time_str, '%Y-%m-%d %H:%M')
 
+                        images.append({
+                            'filename': filename,
+                            'upload_time': upload_time_str,
+                            'upload_time_dt': upload_time_dt,
+                            'author_name': author_name,
+                            'user_id': user_id
+                        })
+
+    else:
+        user_folder = os.path.join(upload_folder, str(current_user.ID))
+        if os.path.exists(user_folder):
+            for filename in os.listdir(user_folder):
+                filepath = os.path.join(user_folder, filename)
+                if os.path.isfile(filepath):
+                    upload_time_str = datetime.datetime.fromtimestamp(os.path.getctime(filepath)).strftime('%Y-%m-%d %H:%M')
+                    upload_time_dt = datetime.datetime.strptime(upload_time_str, '%Y-%m-%d %H:%M')
+
+                    images.append({
+                        'filename': filename,
+                        'upload_time': upload_time_str,
+                        'upload_time_dt': upload_time_dt,
+                        'author_name': f"{current_user.FirstName} {current_user.LastName}",
+                        'user_id': current_user.ID
+                    })
+
+    images.sort(key=lambda x: x['upload_time_dt'], reverse=True)
     return render_template('history.html', images=images)
 
 
@@ -151,8 +179,40 @@ def download_image(filename):
 @ai.route('/delete/<filename>', methods=['POST'])
 @login_required
 def delete_image(filename):
-    user_folder = os.path.join(upload_folder, str(current_user.ID))
-    filepath = os.path.join(user_folder, filename)
-    if os.path.exists(filepath):
-        os.remove(filepath)
+    if current_user.Role == 'Administrator':
+        for user_folder_name in os.listdir(upload_folder):
+            folder_path = os.path.join(upload_folder, user_folder_name)
+            file_path = os.path.join(folder_path, filename)
+            if os.path.exists(file_path):
+                os.remove(file_path)
+                break
+    else:
+        user_folder = os.path.join(upload_folder, str(current_user.ID))
+        file_path = os.path.join(user_folder, filename)
+        if os.path.exists(file_path):
+            os.remove(file_path)
+
+    return redirect(url_for('ai.history'))
+
+
+@ai.route('/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if current_user.Role != 'Administrator':
+        abort(403)
+
+    user_to_delete = User.query.get_or_404(user_id)
+
+    if user_to_delete.ID == current_user.ID:
+        flash('Не можеш да изтриеш собствения си акаунт!', 'warning')
+        return redirect(url_for('ai.history'))
+
+    try:
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        flash(f'Потребителят {user_to_delete.Email} беше изтрит успешно.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('Възникна грешка при изтриването на потребителя.', 'danger')
+
     return redirect(url_for('ai.history'))

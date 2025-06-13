@@ -18,7 +18,11 @@
       {% for img in images %}
       <tr>
         <td style="border: 1px solid #ddd; padding: 12px 20px;">
-          {{ current_user.FirstName }} {{ current_user.LastName }}
+          {% if current_user.Role == 'Administrator' and img.author_name %}
+            {{ img.author_name }}
+          {% else %}
+            {{ current_user.FirstName }} {{ current_user.LastName }}
+          {% endif %}
         </td>
         <td style="border: 1px solid #ddd; padding: 12px 20px;">
           {{ img.filename }}
@@ -31,6 +35,11 @@
           <form action="{{ url_for('ai.delete_image', filename=img.filename) }}" method="post" style="display:inline;" onsubmit="return confirm('Сигурен ли си, че искаш да изтриеш тази снимка?');">
             <button type="submit" class="button" style="background-color: #dc2626; color: white; padding: 4px 10px; font-size: 0.85rem; border: none; border-radius: 4px; cursor: pointer;">Изтрий</button>
           </form>
+          {% if current_user.Role == 'Administrator' and img.user_id %}
+          <form action="{{ url_for('ai.delete_user', user_id=img.user_id) }}" method="post" style="display:inline;" onsubmit="return confirm('Сигурен ли си, че искаш да изтриеш този потребител?');">
+            <button type="submit" class="button" style="background-color: #f97316; color: white; padding: 4px 10px; font-size: 0.85rem; border: none; border-radius: 4px; cursor: pointer;">Изтрий акаунт</button>
+          </form>
+          {% endif %}
         </td>
       </tr>
       {% endfor %}
