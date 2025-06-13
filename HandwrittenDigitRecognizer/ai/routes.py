@@ -128,6 +128,7 @@ def history():
             if os.path.isdir(user_folder_path):
                 user = User.query.filter_by(ID=int(user_folder_name)).first()
                 author_name = f"{user.FirstName} {user.LastName}" if user else "Unknown"
+                author_email = user.Email if user else "Unknown"
                 user_id = user.ID if user else None
 
                 for filename in os.listdir(user_folder_path):
@@ -141,9 +142,9 @@ def history():
                             'upload_time': upload_time_str,
                             'upload_time_dt': upload_time_dt,
                             'author_name': author_name,
+                            'author_email': author_email,
                             'user_id': user_id
                         })
-
     else:
         user_folder = os.path.join(upload_folder, str(current_user.ID))
         if os.path.exists(user_folder):
@@ -158,6 +159,7 @@ def history():
                         'upload_time': upload_time_str,
                         'upload_time_dt': upload_time_dt,
                         'author_name': f"{current_user.FirstName} {current_user.LastName}",
+                        'author_email': current_user.Email,
                         'user_id': current_user.ID
                     })
 

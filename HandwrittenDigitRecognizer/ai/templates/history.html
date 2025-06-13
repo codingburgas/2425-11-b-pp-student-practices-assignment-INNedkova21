@@ -5,10 +5,11 @@
 {% block content %}
 {% if images %}
 <div style="width: 100%; display: flex; justify-content: center;">
-  <table style="width: 100%; max-width: 1300px; border-collapse: collapse; background-color: #f9fafb; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
+  <table style="width: 100%; border-collapse: collapse; background-color: #f9fafb; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
     <thead>
       <tr style="background-color: #e2e8f0;">
         <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: left;">Автор</th>
+        <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: left;">Имейл</th>
         <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: left;">Име на файл</th>
         <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: left;">Качен на</th>
         <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: center;">Действия</th>
@@ -22,6 +23,13 @@
             {{ img.author_name }}
           {% else %}
             {{ current_user.FirstName }} {{ current_user.LastName }}
+          {% endif %}
+        </td>
+        <td style="border: 1px solid #ddd; padding: 12px 20px;">
+          {% if current_user.Role == 'Administrator' and img.author_email %}
+            {{ img.author_email }}
+          {% else %}
+            {{ current_user.Email }}
           {% endif %}
         </td>
         <td style="border: 1px solid #ddd; padding: 12px 20px;">
