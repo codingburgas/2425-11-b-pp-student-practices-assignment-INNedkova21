@@ -1,0 +1,8 @@
+{% extends 'base.html' %}
+{% block title %}Страницата не съществува{% endblock %}
+
+{% block content %}
+<h2 style="color: #dc2626;">Грешка 404</h2>
+<p>Страницата, която търсите, не съществува.</p>
+<a href="{{ url_for('main.index') }}">Върни се в началото</a>
+{% endblock %}
