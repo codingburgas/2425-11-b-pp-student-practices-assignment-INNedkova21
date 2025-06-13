@@ -3,13 +3,13 @@
 {% block title %}Начална страница{% endblock %}
 
 {% block content %}
-<div class="form-container upload-form">
-    <h1>Как мога да ти помогна?</h1>
-    <p>Избери дали искаш да качиш изображение или да нарисуваш цифра:</p>
+<div class="form-container home-container">
+    <h1 class="page-title">Как мога да ти помогна?</h1>
+    <p class="intro-text">Избери дали искаш да качиш изображение или да нарисуваш цифра:</p>
 
     <div class="buttons-container">
-        <a href="{{ url_for('ai.upload') }}" class="button">Качи PNG</a>
-        <a href="{{ url_for('ai.draw') }}" class="button">Нарисувай цифра</a>
+        <a href="{{ url_for('ai.upload') }}" class="coral-button">Качи PNG</a>
+        <a href="{{ url_for('ai.draw') }}" class="coral-button">Нарисувай цифра</a>
     </div>
 </div>
 {% endblock %}
