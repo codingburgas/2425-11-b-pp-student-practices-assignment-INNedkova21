@@ -36,6 +36,28 @@
                 {{ form.confirm_password(id="confirm_password", placeholder="********") }}
             </div>
 
+<!--            <div class="form-group">-->
+<!--                <label>Изберете роля</label><br>-->
+<!--                {% for subfield in form.role %}-->
+<!--                    <div class="form-check form-check-inline">-->
+<!--                        {{ subfield(class="form-check-input") }}-->
+<!--                        <label class="form-check-label">{{ subfield.label.text }}</label>-->
+<!--                    </div>-->
+<!--                {% endfor %}-->
+<!--            </div>-->
+
+            <div class="form-group">
+              <label>Изберете роля</label>
+              <div>
+                <input type="radio" id="user" name="role" value="User" checked>
+                <label for="user">Потребител</label>
+              </div>
+              <div>
+                <input type="radio" id="admin" name="role" value="Administrator">
+                <label for="admin">Администратор</label>
+              </div>
+            </div>
+
             <div class="form-group">
                 {{ form.submit(class="button full-width-button") }}
             </div>

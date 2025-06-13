@@ -1,10 +1,10 @@
 from flask import Flask
 from HandwrittenDigitRecognizer.ai import ai
 from config import Config
-from extensions import db, login_manager
-from main.routes import main
-from auth import auth
-from models.user import User
+from HandwrittenDigitRecognizer.extensions import db, login_manager
+from HandwrittenDigitRecognizer.main.routes import main
+from HandwrittenDigitRecognizer.auth import auth
+from HandwrittenDigitRecognizer.models.user import User
 
 def create_app():
     app = Flask(__name__)
@@ -16,6 +16,9 @@ def create_app():
     app.register_blueprint(main)
     app.register_blueprint(auth)
     app.register_blueprint(ai)
+
+    with app.app_context():
+        db.create_all()
 
     return app
 

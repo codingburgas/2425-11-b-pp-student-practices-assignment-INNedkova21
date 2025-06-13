@@ -10,7 +10,7 @@ from .forms.register_form import RegisterForm
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    if 'first_name' in session and 'last_name' in session and 'role' in session:
+    if 'first_name' in session and 'last_name' in session:
         flash("Вече сте влезли в системата.", "info")
         return redirect(url_for('main.home'))
 
@@ -39,9 +39,10 @@ def login():
         print(form.errors)
     return render_template('login.html', form=form)
 
+
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
-    if 'first_name' in session and 'last_name' in session and 'role' in session:
+    if 'first_name' in session and 'last_name' in session:
         flash("Вече сте влезли в системата.", "info")
         return redirect(url_for('main.home'))
 
@@ -54,6 +55,7 @@ def register():
         email = request.form['email']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
+        role = request.form.get('role', 'User')
 
         if password != confirm_password:
             flash("Паролите не съвпадат. Опитайте отново.", "danger")
@@ -70,6 +72,7 @@ def register():
             LastName=last_name,
             Email=email,
             Password=hashed_password,
+            Role=role
         )
 
         try:
@@ -79,7 +82,7 @@ def register():
             return redirect(url_for('auth.login'))
         except Exception as e:
             db.session.rollback()
-            print(f"Error during registration: {e}")
+            print(f"Грешка при регистрация: {e}")
             flash("Възникна грешка при регистрацията. Опитайте отново.", "danger")
 
     return render_template("register.html", form=form)

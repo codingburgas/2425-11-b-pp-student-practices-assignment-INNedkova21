@@ -33,6 +33,7 @@ def predict_digit(image_array_flat):
     return int(np.argmax(softmax)), float(np.max(softmax))
 
 @ai.route('/upload', methods=['GET', 'POST'])
+@login_required
 def upload():
     prediction = None
     confidence = None
@@ -104,6 +105,7 @@ def upload():
     return render_template('upload.html', prediction=prediction, confidence=confidence, error=error)
 
 @ai.route('/draw', methods=['GET', 'POST'])
+@login_required
 def draw():
     if request.method == 'POST':
         digit = request.form.get('digit')
