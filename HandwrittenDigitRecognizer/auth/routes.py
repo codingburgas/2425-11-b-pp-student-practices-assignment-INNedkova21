@@ -31,7 +31,7 @@ def login():
             session['first_name'] = user.FirstName
             session['last_name'] = user.LastName
 
-            flash('Успешно влизане!', 'success')
+            # flash('Успешно влизане!', 'success')
             return redirect(url_for('main.home'))
         else:
             flash('Грешен имейл или парола', 'danger')

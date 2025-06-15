@@ -1,4 +1,7 @@
+import base64
 import os
+from io import BytesIO
+
 import numpy as np
 from flask import render_template, request, flash, redirect, url_for
 from werkzeug.utils import secure_filename
@@ -107,14 +110,79 @@ def upload():
 @ai.route('/draw', methods=['GET', 'POST'])
 @login_required
 def draw():
+    prediction = None
+    confidence = None
+
     if request.method == 'POST':
-        digit = request.form.get('digit')
-        if digit and digit.isdigit() and 0 <= int(digit) <= 9:
-            flash(f"Цифрата {digit} е приета!", "success")
-            return redirect(url_for('main.draw'))
-        else:
-            flash("Моля, въведете валидна цифра (0-9).", "danger")
-    return render_template("draw.html")
+        image_data = request.form.get('image_data')
+        if image_data:
+            try:
+                header, encoded = image_data.split(",", 1)
+                binary_data = base64.b64decode(encoded)
+                image = Image.open(BytesIO(binary_data))
+
+                processed = preprocess_canvas_image(image)
+                if processed is None:
+                    # flash("Не е открита цифра. Опитай отново.", "danger")
+                    return render_template('draw.html')
+
+                user_folder = os.path.join(upload_folder, str(current_user.ID))
+                os.makedirs(user_folder, exist_ok=True)
+
+                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"drawn_{timestamp}.png"
+                save_path = os.path.join(user_folder, filename)
+
+                debug_array = (1.0 - processed.reshape(28, 28)) * 255
+                debug_img = Image.fromarray(debug_array.astype(np.uint8))
+                debug_img.save(save_path)
+
+                prediction, conf = predict_digit(processed)
+                confidence = round(conf * 100, 2)
+
+            except Exception as e:
+                flash("Възникна грешка при обработката на изображението.", "danger")
+                print("ГРЕШКА:", e)
+
+    return render_template('draw.html', prediction=prediction, confidence=confidence)
+
+
+def preprocess_canvas_image(image):
+    image = image.convert('L')
+    image_array = 255 - np.array(image)
+
+    image_array = (image_array > 30).astype(np.uint8)
+    image_array = binary_dilation(image_array, iterations=1).astype(np.uint8) * 255
+
+    coords = np.argwhere(image_array)
+    if coords.size == 0:
+        return None
+
+    y0, x0 = coords.min(axis=0)
+    y1, x1 = coords.max(axis=0)
+
+    margin = 20
+    y0 = max(0, y0 - margin)
+    x0 = max(0, x0 - margin)
+    y1 = min(image_array.shape[0], y1 + margin)
+    x1 = min(image_array.shape[1], x1 + margin)
+
+    cropped = image_array[y0:y1, x0:x1]
+
+    pil_cropped = Image.fromarray(cropped)
+    pil_resized = pil_cropped.resize((20, 20), Image.Resampling.LANCZOS)
+
+    canvas = np.zeros((28, 28), dtype=np.uint8)
+    canvas[4:24, 4:24] = np.array(pil_resized)
+
+    cy, cx = center_of_mass(canvas)
+    rows, cols = canvas.shape
+    shiftx = np.round(cols / 2 - cx).astype(int)
+    shifty = np.round(rows / 2 - cy).astype(int)
+
+    shifted = shift(canvas, shift=[shifty, shiftx])
+    shifted = shifted / 255.0  # Нормализиране
+    return shifted.reshape(1, 784)
 
 
 @ai.route('/history')
