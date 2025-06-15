@@ -1,14 +1,64 @@
 {% extends "base.html" %}
 
-{% block title %}Въвеждане на цифра{% endblock %}
+{% block title %}Рисувай цифра{% endblock %}
 
 {% block content %}
-<div class="form-container upload-form">
-    <h1>Въведи цифра</h1>
-    <form method="POST" action="{{ url_for('ai.draw') }}">
-        <label for="digit">Цифра (0-9):</label>
-        <input type="text" id="digit" name="digit" pattern="[0-9]" maxlength="1" required>
-        <button type="submit" class="button">Продължи</button>
+<div class="form-container upload-form" style="text-align: center;">
+    <h1>Нарисувай цифра</h1>
+
+    <div style="display: inline-block;">
+        <canvas id="canvas" width="280" height="280" style="border:1px solid #000; background:white;"></canvas>
+
+        <div style="margin-top: 10px; display: flex; justify-content: center; gap: 20px;">
+            <button type="button" onclick="clearCanvas()">Изчисти</button>
+            <button type="button" onclick="submitDrawing()">Разпознай</button>
+        </div>
+    </div>
+
+    <form id="drawForm" method="POST" action="{{ url_for('ai.draw') }}">
+        <input type="hidden" name="image_data" id="image_data">
     </form>
+
+    {% if prediction %}
+        <h2>Разпозната цифра: {{ prediction }}</h2>
+        {% if confidence %}
+            <p>Увереност: {{ confidence }}%</p>
+        {% endif %}
+    {% endif %}
 </div>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let drawing = false;
+
+    canvas.addEventListener('mousedown', e => {
+        drawing = true;
+        ctx.beginPath();
+        ctx.moveTo(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener('mousemove', e => {
+        if (drawing) {
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = 10;
+            ctx.lineCap = "round";
+            ctx.stroke();
+        }
+    });
+
+    canvas.addEventListener('mouseup', () => drawing = false);
+    canvas.addEventListener('mouseleave', () => drawing = false);
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function submitDrawing() {
+        const dataURL = canvas.toDataURL('image/png');
+        document.getElementById('image_data').value = dataURL;
+        document.getElementById('drawForm').submit();
+    }
+</script>
 {% endblock %}
