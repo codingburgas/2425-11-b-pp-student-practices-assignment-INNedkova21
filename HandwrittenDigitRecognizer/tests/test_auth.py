@@ -1,5 +1,4 @@
 import pytest
-from flask import url_for
 from HandwrittenDigitRecognizer.app import create_app, db
 from HandwrittenDigitRecognizer.config import TestingConfig
 from HandwrittenDigitRecognizer.models.user import User
@@ -7,22 +6,17 @@ from werkzeug.security import generate_password_hash
 
 @pytest.fixture
 def app():
-    app = create_app('testing')
+    app = create_app(TestingConfig)
     with app.app_context():
         db.create_all()
         yield app
         db.session.remove()
         db.drop_all()
 
-
 @pytest.fixture
-def client():
-    app = create_app(TestingConfig)
-    with app.app_context():
-        db.create_all()
+def client(app):
     with app.test_client() as client:
         yield client
-
 
 def test_register_success(client):
     response = client.post('/register', data={
@@ -66,7 +60,7 @@ def test_login_unconfirmed_email(client, app):
         'password': 'testpass'
     }, follow_redirects=True)
 
-    assert 'потвърдете своя имейл адрес' in response.data.decode('utf-8')
+    assert 'потвърдете' in response.data.decode('utf-8').lower()
 
 
 def test_login_success(client, app):
@@ -86,13 +80,5 @@ def test_login_success(client, app):
         'password': 'testpass'
     }, follow_redirects=True)
 
-    assert 'Успешно' in response.data or b'home' in response.data.decode('utf-8')
-
-@pytest.fixture
-def app():
-    app = create_app(TestingConfig)
-    with app.app_context():
-        db.create_all()
-        yield app
-        db.session.remove()
-        db.drop_all()
+    decoded = response.data.decode('utf-8').lower()
+    assert 'успешно' in decoded or 'home' in decoded

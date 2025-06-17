@@ -19,10 +19,10 @@ def client(app):
 def test_index_route(client):
     response = client.get('/')
     assert response.status_code == 200
-    assert 'Digit Recognizer' in response.data.decode('utf-8')  # ако в index.html има такъв текст
+    assert 'Digit Recognizer' in response.data.decode('utf-8')
 
 
 def test_home_route(client):
     response = client.get('/home')
     assert response.status_code == 200
-    assert 'Начало' in response.data.decode('utf-8')  # ако в home.html има такъв текст
+    assert 'Начало' in response.data.decode('utf-8')
