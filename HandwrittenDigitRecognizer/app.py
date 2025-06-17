@@ -7,9 +7,9 @@ from HandwrittenDigitRecognizer.main.routes import main
 from HandwrittenDigitRecognizer.auth import auth
 from HandwrittenDigitRecognizer.models.user import User
 
-def create_app():
+def create_app(config_class=Config):
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(config_class)
 
     db.init_app(app)
     mail.init_app(app)

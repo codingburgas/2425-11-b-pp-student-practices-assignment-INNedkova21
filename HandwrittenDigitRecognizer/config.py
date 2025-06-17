@@ -21,5 +21,12 @@ class Config:
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = 'ivasla07@gmail.com'
-    MAIL_PASSWORD = 'ptwptosgvkdulhlk'
+    MAIL_PASSWORD = 'xjtxkmnjnqbcvvuy'
     MAIL_DEFAULT_SENDER = MAIL_USERNAME
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    WTF_CSRF_ENABLED = False
+    LOGIN_DISABLED = True
+    MAIL_SUPPRESS_SEND = False

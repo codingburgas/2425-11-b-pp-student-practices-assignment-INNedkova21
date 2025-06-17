@@ -1,7 +1,6 @@
 import base64
 import os
 from io import BytesIO
-
 import numpy as np
 from flask import render_template, request, flash, redirect, url_for
 from werkzeug.utils import secure_filename
