@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, Blueprint, session
+from flask import render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import auth
@@ -6,7 +6,7 @@ from HandwrittenDigitRecognizer.models.user import User
 from HandwrittenDigitRecognizer.app import db
 from .forms.login_form import LoginForm
 from .forms.register_form import RegisterForm
-from HandwrittenDigitRecognizer.email import send_confirmation_email, confirm_token  # ← добавено
+from HandwrittenDigitRecognizer.email import send_confirmation_email, confirm_token
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -23,7 +23,7 @@ def login():
 
         user = User.query.filter_by(Email=email).first()
         if user and check_password_hash(user.Password, form.password.data):
-            if not user.Confirmed:  # 🔒 проверка за потвърден имейл
+            if not user.Confirmed:
                 flash('Моля, потвърдете своя имейл адрес преди да влезете.', 'warning')
                 return redirect(url_for('auth.login'))
 

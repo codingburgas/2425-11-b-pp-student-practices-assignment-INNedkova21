@@ -7,12 +7,13 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 from scipy.ndimage import center_of_mass, shift, binary_dilation
 from . import ai
-import datetime
+from datetime import datetime
 from flask import send_from_directory, abort
 from flask_login import current_user, login_required
 import pickle
 
 from ..extensions import db
+from ..models.prediction import Prediction
 from ..models.user import User
 
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -101,6 +102,21 @@ def upload():
             debug_img = Image.fromarray((255 - final_img.reshape(28,28)*255).astype(np.uint8))
             debug_img.save(save_path)
 
+            if prediction is not None:
+                new_prediction = Prediction(
+                    UserID=current_user.ID,
+                    ImagePath=save_path,
+                    Prediction=prediction,
+                    Confidence=confidence,
+                    CreatedAt=datetime.now()
+                )
+                try:
+                    db.session.add(new_prediction)
+                    db.session.commit()
+                except Exception as e:
+                    db.session.rollback()
+                    error = "Грешка при запис в базата: " + str(e)
+
         else:
             error = "Please upload a valid PNG image."
 
@@ -128,7 +144,7 @@ def draw():
                 user_folder = os.path.join(upload_folder, str(current_user.ID))
                 os.makedirs(user_folder, exist_ok=True)
 
-                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 filename = f"drawn_{timestamp}.png"
                 save_path = os.path.join(user_folder, filename)
 
@@ -139,8 +155,23 @@ def draw():
                 prediction, conf = predict_digit(processed)
                 confidence = round(conf * 100, 2)
 
+                if prediction is not None:
+                    new_prediction = Prediction(
+                        UserID=current_user.ID,
+                        ImagePath=save_path,
+                        Prediction=prediction,
+                        Confidence=confidence,
+                        CreatedAt=datetime.now()
+                    )
+                    try:
+                        db.session.add(new_prediction)
+                        db.session.commit()
+                    except Exception as e:
+                        db.session.rollback()
+                        flash("Грешка при запис в базата: " + str(e), "danger")
+
             except Exception as e:
-                flash("Възникна грешка при обработката на изображението.", "danger")
+                # flash("Възникна грешка при обработката на изображението.", "danger")
                 print("ГРЕШКА:", e)
 
     return render_template('draw.html', prediction=prediction, confidence=confidence)
@@ -183,52 +214,33 @@ def preprocess_canvas_image(image):
     shifted = shifted / 255.0  # Нормализиране
     return shifted.reshape(1, 784)
 
-
 @ai.route('/history')
 @login_required
 def history():
     images = []
 
     if current_user.Role == 'Administrator':
-        for user_folder_name in os.listdir(upload_folder):
-            user_folder_path = os.path.join(upload_folder, user_folder_name)
-            if os.path.isdir(user_folder_path):
-                user = User.query.filter_by(ID=int(user_folder_name)).first()
-                author_name = f"{user.FirstName} {user.LastName}" if user else "Unknown"
-                author_email = user.Email if user else "Unknown"
-                user_id = user.ID if user else None
-
-                for filename in os.listdir(user_folder_path):
-                    filepath = os.path.join(user_folder_path, filename)
-                    if os.path.isfile(filepath):
-                        upload_time_str = datetime.datetime.fromtimestamp(os.path.getctime(filepath)).strftime('%Y-%m-%d %H:%M')
-                        upload_time_dt = datetime.datetime.strptime(upload_time_str, '%Y-%m-%d %H:%M')
-
-                        images.append({
-                            'filename': filename,
-                            'upload_time': upload_time_str,
-                            'upload_time_dt': upload_time_dt,
-                            'author_name': author_name,
-                            'author_email': author_email,
-                            'user_id': user_id
-                        })
+        predictions = Prediction.query.order_by(Prediction.CreatedAt.desc()).all()
     else:
-        user_folder = os.path.join(upload_folder, str(current_user.ID))
-        if os.path.exists(user_folder):
-            for filename in os.listdir(user_folder):
-                filepath = os.path.join(user_folder, filename)
-                if os.path.isfile(filepath):
-                    upload_time_str = datetime.datetime.fromtimestamp(os.path.getctime(filepath)).strftime('%Y-%m-%d %H:%M')
-                    upload_time_dt = datetime.datetime.strptime(upload_time_str, '%Y-%m-%d %H:%M')
+        predictions = Prediction.query.filter_by(UserID=current_user.ID).order_by(Prediction.CreatedAt.desc()).all()
 
-                    images.append({
-                        'filename': filename,
-                        'upload_time': upload_time_str,
-                        'upload_time_dt': upload_time_dt,
-                        'author_name': f"{current_user.FirstName} {current_user.LastName}",
-                        'author_email': current_user.Email,
-                        'user_id': current_user.ID
-                    })
+    for prediction in predictions:
+        user = User.query.filter_by(ID=prediction.UserID).first()
+        author_name = f"{user.FirstName} {user.LastName}" if user else "Unknown"
+        author_email = user.Email if user else "Unknown"
+        user_id = user.ID if user else None
+
+        upload_time_str = prediction.CreatedAt.strftime('%Y-%m-%d %H:%M')
+        upload_time_dt = prediction.CreatedAt
+
+        images.append({
+            'filename': os.path.basename(prediction.ImagePath),
+            'upload_time': upload_time_str,
+            'upload_time_dt': upload_time_dt,
+            'author_name': author_name,
+            'author_email': author_email,
+            'user_id': user_id
+        })
 
     images.sort(key=lambda x: x['upload_time_dt'], reverse=True)
     return render_template('history.html', images=images)
@@ -237,11 +249,22 @@ def history():
 @ai.route('/download/<filename>')
 @login_required
 def download_image(filename):
-    user_folder = os.path.join(upload_folder, str(current_user.ID))
-    filepath = os.path.join(user_folder, filename)
-    if os.path.exists(filepath):
-        return send_from_directory(user_folder, filename, as_attachment=True)
+    filename = secure_filename(filename)
+
+    if current_user.Role == 'Administrator':
+        # Търси във всички потребителски папки
+        for user_folder_name in os.listdir(upload_folder):
+            user_folder = os.path.join(upload_folder, user_folder_name)
+            filepath = os.path.join(user_folder, filename)
+            if os.path.exists(filepath):
+                return send_from_directory(user_folder, filename, as_attachment=True)
+        abort(404)  # ако не е намерен
     else:
+        # Нормален потребител - търси само в неговата папка
+        user_folder = os.path.join(upload_folder, str(current_user.ID))
+        filepath = os.path.join(user_folder, filename)
+        if os.path.exists(filepath):
+            return send_from_directory(user_folder, filename, as_attachment=True)
         abort(404)
 
 
