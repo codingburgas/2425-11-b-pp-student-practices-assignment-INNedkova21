@@ -19,7 +19,7 @@
         <input type="hidden" name="image_data" id="image_data">
     </form>
 
-    {% if prediction %}
+    {% if prediction is not none%}
         <h2>Разпозната цифра: {{ prediction }}</h2>
         {% if confidence %}
             <p>Увереност: {{ confidence }}%</p>
