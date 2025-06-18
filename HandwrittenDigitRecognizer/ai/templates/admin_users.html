@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Административен панел{% endblock %}
+
+{% block content %}
+<h1>Административен панел - Потребители</h1>
+
+{% if users %}
+  <table style="width: 100%; border-collapse: collapse; background-color: #f9fafb; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
+    <thead>
+      <tr style="background-color: #e2e8f0;">
+        <th style="border: 1px solid #ddd; padding: 15px 20px;">Име</th>
+        <th style="border: 1px solid #ddd; padding: 15px 20px;">Имейл</th>
+        <th style="border: 1px solid #ddd; padding: 15px 20px;">Роля</th>
+        <th style="border: 1px solid #ddd; padding: 15px 20px;">Създаден на</th>
+        <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: center;">Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td style="border: 1px solid #ddd; padding: 12px 20px;">{{ user.FirstName }} {{ user.LastName }}</td>
+        <td style="border: 1px solid #ddd; padding: 12px 20px;">{{ user.Email }}</td>
+        <td style="border: 1px solid #ddd; padding: 12px 20px;">{{ user.Role }}</td>
+        <td style="border: 1px solid #ddd; padding: 12px 20px;">{{ user.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td style="border: 1px solid #ddd; padding: 12px 20px; text-align: center;">
+          <a href="{{ url_for('ai.admin_user_details', user_id=user.ID) }}" class="button" style="background-color: #3b82f6; color: white; padding: 4px 10px; font-size: 0.85rem; border-radius: 4px; text-decoration: none; margin-left: 8px;">Виж повече</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>Няма регистрирани потребители.</p>
+{% endif %}
+{% endblock %}

@@ -141,6 +141,9 @@
       <a href="{{ url_for('ai.upload') }}">Качи PNG</a>
       <a href="{{ url_for('ai.draw') }}">Нарисувай цифра</a>
       <a href="{{ url_for('ai.history') }}">История</a>
+      {% if current_user.is_authenticated and current_user.Role == 'Administrator' %}
+        <a href="{{ url_for('ai.admin_users') }}">Админ панел</a>
+      {% endif %}
       <a href="{{ url_for('ai.profile') }}">Профил</a>
       <a href="{{ url_for('auth.logout') }}">Изход</a>
     </nav>

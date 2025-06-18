@@ -270,6 +270,8 @@ def download_image(filename):
     abort(404)
 
 
+from flask import request
+
 @ai.route('/delete/<filename>', methods=['POST'])
 @login_required
 def delete_image(filename):
@@ -279,7 +281,6 @@ def delete_image(filename):
     prediction = Prediction.query.filter(Prediction.ImagePath.like(f"%{filename}")).first()
 
     if not os.path.exists(upload_folder):
-        # flash('Файлът не беше намерен.', 'warning')
         return redirect(url_for('ai.history'))
 
     if current_user.Role == 'Administrator':
@@ -304,13 +305,14 @@ def delete_image(filename):
         except Exception as e:
             db.session.rollback()
             flash('Грешка при изтриване от базата: ' + str(e), 'danger')
-    elif deleted:
-        flash('Файлът беше изтрит, но не бе намерен в базата.', 'warning')
 
-    if not deleted:
-        flash('Файлът не беше намерен или вече е изтрит.', 'warning')
+    next_page = request.args.get('next')
 
-    return redirect(url_for('ai.history'))
+    if next_page == 'admin_user_details':
+        # Можеш да промениш според нужния URL (например ако трябва и с ID на потребител)
+        return redirect(url_for('ai.admin_user_details', user_id=user_id))
+    else:
+        return redirect(url_for('ai.history'))
 
 
 @ai.route('/delete_user/<int:user_id>', methods=['POST'])
@@ -326,12 +328,13 @@ def delete_user(user_id):
         return redirect(url_for('ai.history'))
 
     try:
+        Prediction.query.filter_by(UserID=user_to_delete.ID).delete()
         db.session.delete(user_to_delete)
         db.session.commit()
         flash(f'Потребителят {user_to_delete.Email} беше изтрит успешно.', 'success')
     except Exception as e:
         db.session.rollback()
-        flash('Възникна грешка при изтриването на потребителя.', 'danger')
+        flash('Възникна грешка при изтриването на потребителя: ' + str(e), 'danger')
 
     return redirect(url_for('ai.history'))
 
@@ -363,3 +366,23 @@ def profile():
                 error = "Възникна грешка при смяната на паролата."
 
     return render_template('profile.html', error=error, success=success)
+
+
+@ai.route('/admin/users')
+@login_required
+def admin_users():
+    if current_user.Role != 'Administrator':
+        abort(403)
+    users = User.query.order_by(User.CreatedAt.desc()).all()
+    return render_template('admin_users.html', users=users)
+
+@ai.route('/admin/user/<int:user_id>')
+@login_required
+def admin_user_details(user_id):
+    if current_user.Role != 'Administrator':
+        abort(403)
+
+    user = User.query.get_or_404(user_id)
+    predictions = Prediction.query.filter_by(UserID=user.ID).order_by(Prediction.CreatedAt.desc()).all()
+
+    return render_template('admin_user_details.html', user=user, predictions=predictions)

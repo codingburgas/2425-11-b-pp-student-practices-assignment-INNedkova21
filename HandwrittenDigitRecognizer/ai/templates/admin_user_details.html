@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Детайли за потребител{% endblock %}
+
+{% block content %}
+<h1>Потребител: {{ user.FirstName }} {{ user.LastName }}</h1>
+<p>Имейл: {{ user.Email }}</p>
+<p>Дата на регистрация: {{ user.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</p>
+
+<h2 style="margin-top: 30px;">Качени снимки</h2>
+
+{% if predictions %}
+<table style="width: 100%; border-collapse: collapse; background-color: #f9fafb; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
+  <thead>
+    <tr style="background-color: #e2e8f0;">
+      <th style="border: 1px solid #ddd; padding: 15px 20px;">Име на файл</th>
+      <th style="border: 1px solid #ddd; padding: 15px 20px;">Разпознато число</th>
+      <th style="border: 1px solid #ddd; padding: 15px 20px;">Увереност</th>
+      <th style="border: 1px solid #ddd; padding: 15px 20px;">Качено на</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in predictions %}
+    {% set filename = p.ImagePath.split('/')[-1] %}
+    <tr>
+      <td style="border: 1px solid #ddd; padding: 12px 20px;">{{ filename }}</td>
+      <td style="border: 1px solid #ddd; padding: 12px 20px;">{{ p.Prediction }}</td>
+      <td style="border: 1px solid #ddd; padding: 12px 20px;">{{ p.Confidence }}%</td>
+      <td style="border: 1px solid #ddd; padding: 12px 20px;">{{ p.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Потребителят все още не е качил снимки.</p>
+{% endif %}
+{% endblock %}
