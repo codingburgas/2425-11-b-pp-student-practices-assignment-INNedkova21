@@ -3,6 +3,7 @@ import os
 from io import BytesIO
 import numpy as np
 from flask import render_template, request, flash, redirect, url_for
+from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image
 from scipy.ndimage import center_of_mass, shift, binary_dilation
@@ -251,38 +252,63 @@ def history():
 def download_image(filename):
     filename = secure_filename(filename)
 
+    if not os.path.exists(upload_folder):
+        abort(404)
+
     if current_user.Role == 'Administrator':
-        # Търси във всички потребителски папки
         for user_folder_name in os.listdir(upload_folder):
             user_folder = os.path.join(upload_folder, user_folder_name)
             filepath = os.path.join(user_folder, filename)
             if os.path.exists(filepath):
                 return send_from_directory(user_folder, filename, as_attachment=True)
-        abort(404)  # ако не е намерен
     else:
-        # Нормален потребител - търси само в неговата папка
         user_folder = os.path.join(upload_folder, str(current_user.ID))
         filepath = os.path.join(user_folder, filename)
         if os.path.exists(filepath):
             return send_from_directory(user_folder, filename, as_attachment=True)
-        abort(404)
+
+    abort(404)
 
 
 @ai.route('/delete/<filename>', methods=['POST'])
 @login_required
 def delete_image(filename):
+    filename = secure_filename(filename)
+    deleted = False
+
+    prediction = Prediction.query.filter(Prediction.ImagePath.like(f"%{filename}")).first()
+
+    if not os.path.exists(upload_folder):
+        # flash('Файлът не беше намерен.', 'warning')
+        return redirect(url_for('ai.history'))
+
     if current_user.Role == 'Administrator':
         for user_folder_name in os.listdir(upload_folder):
             folder_path = os.path.join(upload_folder, user_folder_name)
             file_path = os.path.join(folder_path, filename)
             if os.path.exists(file_path):
                 os.remove(file_path)
+                deleted = True
                 break
     else:
         user_folder = os.path.join(upload_folder, str(current_user.ID))
         file_path = os.path.join(user_folder, filename)
         if os.path.exists(file_path):
             os.remove(file_path)
+            deleted = True
+
+    if prediction:
+        try:
+            db.session.delete(prediction)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash('Грешка при изтриване от базата: ' + str(e), 'danger')
+    elif deleted:
+        flash('Файлът беше изтрит, но не бе намерен в базата.', 'warning')
+
+    if not deleted:
+        flash('Файлът не беше намерен или вече е изтрит.', 'warning')
 
     return redirect(url_for('ai.history'))
 
@@ -308,3 +334,32 @@ def delete_user(user_id):
         flash('Възникна грешка при изтриването на потребителя.', 'danger')
 
     return redirect(url_for('ai.history'))
+
+
+@ai.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    error = None
+    success = None
+
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+
+        if not check_password_hash(current_user.Password, current_password):
+            error = "Текущата парола е грешна."
+        elif new_password != confirm_password:
+            error = "Новата парола не съвпада с потвърждението."
+        elif len(new_password) < 6:
+            error = "Паролата трябва да е поне 6 символа."
+        else:
+            current_user.Password = generate_password_hash(new_password)
+            try:
+                db.session.commit()
+                success = "Паролата е сменена успешно."
+            except:
+                db.session.rollback()
+                error = "Възникна грешка при смяната на паролата."
+
+    return render_template('profile.html', error=error, success=success)

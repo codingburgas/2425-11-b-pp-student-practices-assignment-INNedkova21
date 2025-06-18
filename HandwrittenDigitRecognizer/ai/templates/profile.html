@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Профил{% endblock %}
+
+{% block content %}
+<h1>Профил</h1>
+
+<div style="margin-bottom: 30px;">
+  <p><strong>Име:</strong> {{ current_user.FirstName }}</p>
+  <p><strong>Фамилия:</strong> {{ current_user.LastName }}</p>
+  <p><strong>Имейл:</strong> {{ current_user.Email }}</p>
+  <p><strong>Създаден на:</strong> {{ current_user.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</p>
+</div>
+
+<h2>Смяна на парола</h2>
+
+{% if error %}
+  <p style="color: red;">{{ error }}</p>
+{% endif %}
+{% if success %}
+  <p style="color: green;">{{ success }}</p>
+{% endif %}
+
+<form method="POST">
+  <div style="margin-bottom: 10px;">
+    <label>Текуща парола:</label><br />
+    <input type="password" name="current_password" required />
+  </div>
+  <div style="margin-bottom: 10px;">
+    <label>Нова парола:</label><br />
+    <input type="password" name="new_password" required />
+  </div>
+  <div style="margin-bottom: 10px;">
+    <label>Потвърди новата парола:</label><br />
+    <input type="password" name="confirm_password" required />
+  </div>
+  <button type="submit" style="padding: 6px 12px; background-color: #3b82f6; color: white; border: none; border-radius: 4px;">Запази</button>
+</form>
+{% endblock %}

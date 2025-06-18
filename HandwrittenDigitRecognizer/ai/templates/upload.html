@@ -5,11 +5,16 @@
 {% block content %}
 <div class="form-container upload-form">
     <h1>Качи изображение</h1>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
+        <div class="flashes">
+          {% for category, message in messages %}
+            {% if message %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endif %}
+          {% endfor %}
+        </div>
       {% endif %}
     {% endwith %}
 
@@ -19,13 +24,13 @@
         <button type="submit" class="button">Разпознай</button>
     </form>
 
-{% if prediction is not none %}
-    <div class="result">
-        <h2>Разпознато число: {{ prediction }}</h2>
-        {% if confidence %}
-            <p>Увереност: {{ confidence }}%</p>
-        {% endif %}
-    </div>
-{% endif %}
+    {% if prediction is not none %}
+        <div class="result">
+            <h2>Разпознато число: {{ prediction }}</h2>
+            {% if confidence %}
+                <p>Увереност: {{ confidence }}%</p>
+            {% endif %}
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

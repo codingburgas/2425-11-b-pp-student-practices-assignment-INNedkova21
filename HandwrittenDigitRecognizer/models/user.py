@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from HandwrittenDigitRecognizer.extensions import db
@@ -14,6 +15,7 @@ class User(UserMixin, db.Model):
     Password = db.Column(db.String(120), nullable=False)
     Role = db.Column(db.String(120), nullable=False, default='User')
     Confirmed = db.Column(db.Boolean, nullable=False, default=False)
+    CreatedAt = db.Column(db.DateTime, default=datetime.utcnow)
 
     def set_password(self, password):
         self.Password = generate_password_hash(password)
