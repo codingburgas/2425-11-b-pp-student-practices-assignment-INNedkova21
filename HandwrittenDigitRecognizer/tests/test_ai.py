@@ -2,10 +2,11 @@ from PIL import Image
 import io
 import numpy as np
 import pytest
+
+from HandwrittenDigitRecognizer import db
 from HandwrittenDigitRecognizer.ai.routes import leaky_relu, predict_digit
 from HandwrittenDigitRecognizer.app import create_app
 from HandwrittenDigitRecognizer.config import TestingConfig
-from HandwrittenDigitRecognizer.extensions import db
 
 
 def test_leaky_relu_positive():

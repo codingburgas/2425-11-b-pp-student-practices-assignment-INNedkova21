@@ -1,5 +1,6 @@
 import pytest
-from HandwrittenDigitRecognizer.app import create_app, db
+
+from HandwrittenDigitRecognizer import create_app, db
 from HandwrittenDigitRecognizer.config import TestingConfig
 
 @pytest.fixture
