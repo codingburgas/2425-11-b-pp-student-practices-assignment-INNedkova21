@@ -152,6 +152,8 @@ h1 {
     background-color: #f5f7fa;
     color: #2c3e50;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
 }
 
 .upload-form h1,
@@ -168,6 +170,9 @@ h1 {
 .upload-form .button {
     background-color: #4a90e2;
     border-radius: 30px;
+    display: block;
+    margin: 0 auto;
+    max-width: 500px;
 }
 
 .upload-form .button:hover {
@@ -294,4 +299,54 @@ h1 {
   margin: 40px auto;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   text-align: center;
+}
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.fade-in.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.button:hover {
+    background-color: #e35040;
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(227, 80, 64, 0.5);
+}
+
+@media (max-width: 480px) {
+  .buttons-container {
+    flex-direction: column;
+  }
+
+  .button {
+    margin: 10px 0;
+    width: 100%;
+    max-width: 250px;
+  }
+}
+
+
+.coral-small-button {
+    background-color: #ff6f61 !important;
+    color: white !important;
+    border: none;
+    padding: 10px 24px;
+    font-size: 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+    display: inline-block;
+    width: auto !important;
+    max-width: 180px;
+}
+
+.coral-small-button:hover {
+    background-color: #e35040 !important;
+    transform: scale(1.05);
+    box-shadow: 0 6px 18px rgba(227, 80, 64, 0.6);
 }

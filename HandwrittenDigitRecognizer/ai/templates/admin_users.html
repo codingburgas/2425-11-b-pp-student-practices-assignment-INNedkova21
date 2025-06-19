@@ -24,7 +24,9 @@
         <td style="border: 1px solid #ddd; padding: 12px 20px;">{{ user.Role }}</td>
         <td style="border: 1px solid #ddd; padding: 12px 20px;">{{ user.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</td>
         <td style="border: 1px solid #ddd; padding: 12px 20px; text-align: center;">
-          <a href="{{ url_for('ai.admin_user_details', user_id=user.ID) }}" class="button" style="background-color: #3b82f6; color: white; padding: 4px 10px; font-size: 0.85rem; border-radius: 4px; text-decoration: none; margin-left: 8px;">Виж повече</a>
+          <a href="{{ url_for('ai.admin_user_details', user_id=user.ID) }}" class="button" style="background-color: #3b82f6; color: white; padding: 4px 10px; font-size: 0.85rem; border-radius: 4px; text-decoration: none; margin-left: 8px;">
+            <i class="fas fa-info-circle"></i> Виж повече
+          </a>
         </td>
       </tr>
       {% endfor %}

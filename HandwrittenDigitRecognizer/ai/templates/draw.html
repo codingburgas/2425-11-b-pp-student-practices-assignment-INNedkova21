@@ -7,11 +7,11 @@
     <h1>Нарисувай цифра</h1>
 
     <div style="display: inline-block;">
-        <canvas id="canvas" width="280" height="280" style="border:1px solid #000; background:white;"></canvas>
+        <canvas id="canvas" width="280" height="280" style="border: 3px solid #ff6f61; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(255, 111, 97, 0.3); cursor: crosshair;"></canvas>
 
         <div style="margin-top: 10px; display: flex; justify-content: center; gap: 20px;">
-            <button type="button" onclick="clearCanvas()">Изчисти</button>
-            <button type="button" onclick="submitDrawing()">Разпознай</button>
+            <button type="button" class="coral-small-button" onclick="clearCanvas()">Изчисти</button>
+            <button type="button" class="coral-small-button" onclick="submitDrawing()">Разпознай</button>
         </div>
     </div>
 
@@ -19,7 +19,7 @@
         <input type="hidden" name="image_data" id="image_data">
     </form>
 
-    {% if prediction is not none%}
+    {% if prediction is not none %}
         <h2>Разпозната цифра: {{ prediction }}</h2>
         {% if confidence %}
             <p>Увереност: {{ confidence }}%</p>
@@ -61,7 +61,6 @@
 
     function clearCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
         // Връщаме бял фон след изчистване
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -73,6 +72,4 @@
         document.getElementById('drawForm').submit();
     }
 </script>
-
-
 {% endblock %}

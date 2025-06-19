@@ -4,9 +4,9 @@
 {% block title %}Вход{% endblock %}
 
 {% block content %}
-<div class="registration-wrapper">
+<div class="registration-wrapper fade-in">
     <div class="form-container custom-register-form">
-        <h1 class="page-title">Вход</h1>
+        <h1 class="page-title"><i class="fas fa-sign-in-alt"></i> Вход</h1>
 
         <form method="POST" action="{{ url_for('auth.login') }}">
             {{ form.hidden_tag() }}
@@ -53,4 +53,10 @@
         {% endwith %}
     </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelector('.fade-in')?.classList.add('show');
+  });
+</script>
 {% endblock %}

@@ -3,13 +3,19 @@
 {% block title %}Начална страница{% endblock %}
 
 {% block content %}
-<div class="form-container home-container">
+<div class="form-container home-container fade-in">
     <h1 class="page-title">Как мога да ти помогна?</h1>
     <p class="intro-text">Избери дали искаш да качиш изображение или да нарисуваш цифра:</p>
 
     <div class="buttons-container">
-        <a href="{{ url_for('ai.upload') }}" class="coral-button">Качи PNG</a>
-        <a href="{{ url_for('ai.draw') }}" class="coral-button">Нарисувай цифра</a>
+        <a href="{{ url_for('ai.upload') }}" class="button"><i class="fas fa-upload"></i> Качи PNG</a>
+        <a href="{{ url_for('ai.draw') }}" class="button"><i class="fas fa-pen"></i> Нарисувай цифра</a>
     </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelector('.fade-in')?.classList.add('show');
+  });
+</script>
 {% endblock %}

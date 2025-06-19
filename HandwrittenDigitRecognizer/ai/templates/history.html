@@ -39,13 +39,19 @@
           {{ img.upload_time }}
         </td>
         <td style="border: 1px solid #ddd; padding: 12px 20px; text-align: center;">
-          <a href="{{ url_for('ai.download_image', filename=img.filename) }}" class="button" style="background-color: #22c55e; color: white; padding: 4px 10px; font-size: 0.85rem; border-radius: 4px; text-decoration: none; margin-right: 8px;">Изтегли</a>
+          <a href="{{ url_for('ai.download_image', filename=img.filename) }}" class="button" style="background-color: #22c55e; color: white; padding: 4px 10px; font-size: 0.85rem; border-radius: 4px; text-decoration: none; margin-right: 8px; display: inline-flex; align-items: center; gap: 5px;">
+            <i class="fas fa-download"></i> Изтегли
+          </a>
           <form action="{{ url_for('ai.delete_image', filename=img.filename) }}" method="post" style="display:inline;" onsubmit="return confirm('Сигурен ли си, че искаш да изтриеш тази снимка?');">
-            <button type="submit" class="button" style="background-color: #dc2626; color: white; padding: 4px 10px; font-size: 0.85rem; border: none; border-radius: 4px; cursor: pointer;">Изтрий</button>
+            <button type="submit" class="button" style="background-color: #dc2626; color: white; padding: 4px 10px; font-size: 0.85rem; border: none; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+              <i class="fas fa-trash-alt"></i> Изтрий
+            </button>
           </form>
           {% if current_user.Role == 'Administrator' and img.user_id %}
           <form action="{{ url_for('ai.delete_user', user_id=img.user_id) }}" method="post" style="display:inline;" onsubmit="return confirm('Сигурен ли си, че искаш да изтриеш този потребител?');">
-            <button type="submit" class="button" style="background-color: #f97316; color: white; padding: 4px 10px; font-size: 0.85rem; border: none; border-radius: 4px; cursor: pointer;">Изтрий акаунт</button>
+            <button type="submit" class="button" style="background-color: #f97316; color: white; padding: 4px 10px; font-size: 0.85rem; border: none; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+              <i class="fas fa-user-slash"></i> Изтрий акаунт
+            </button>
           </form>
           {% endif %}
         </td>

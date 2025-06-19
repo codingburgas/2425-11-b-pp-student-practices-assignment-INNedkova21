@@ -3,37 +3,44 @@
 {% block title %}Профил{% endblock %}
 
 {% block content %}
-<h1>Профил</h1>
+<div class="form-container upload-form" style="max-width: 500px; margin: 40px auto; padding: 30px; text-align: center;">
+  <h1 style="color: #2c3e50; margin-bottom: 20px;">Профил</h1>
 
-<div style="margin-bottom: 30px;">
-  <p><strong>Име:</strong> {{ current_user.FirstName }}</p>
-  <p><strong>Фамилия:</strong> {{ current_user.LastName }}</p>
-  <p><strong>Имейл:</strong> {{ current_user.Email }}</p>
-  <p><strong>Създаден на:</strong> {{ current_user.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</p>
+  <div style="margin-bottom: 30px; line-height: 1.8; text-align: left;">
+    <p><strong>Име:</strong> {{ current_user.FirstName }}</p>
+    <p><strong>Фамилия:</strong> {{ current_user.LastName }}</p>
+    <p><strong>Имейл:</strong> {{ current_user.Email }}</p>
+    <p><strong>Създаден на:</strong> {{ current_user.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</p>
+  </div>
+
+  <h2 style="color: #ff6f61; margin-bottom: 15px;">Смяна на парола</h2>
+
+  {% if error %}
+    <p style="color: #dc2626; font-weight: 600;">{{ error }}</p>
+  {% endif %}
+  {% if success %}
+    <p style="color: #16a34a; font-weight: 600;">{{ success }}</p>
+  {% endif %}
+
+  <form method="POST" style="text-align: left;">
+    <div style="margin-bottom: 15px;">
+      <label for="current_password">Текуща парола:</label>
+      <input type="password" id="current_password" name="current_password" required
+             style="width: 100%; padding: 10px; background-color: #ffffff; color: #2c3e50; border: 1.5px solid #3b82f6; border-radius: 6px;" />
+    </div>
+    <div style="margin-bottom: 15px;">
+      <label for="new_password">Нова парола:</label>
+      <input type="password" id="new_password" name="new_password" required
+             style="width: 100%; padding: 10px; background-color: #ffffff; color: #2c3e50; border: 1.5px solid #3b82f6; border-radius: 6px;" />
+    </div>
+    <div style="margin-bottom: 20px;">
+      <label for="confirm_password">Потвърди новата парола:</label>
+      <input type="password" id="confirm_password" name="confirm_password" required
+             style="width: 100%; padding: 10px; background-color: #ffffff; color: #2c3e50; border: 1.5px solid #3b82f6; border-radius: 6px;" />
+    </div>
+    <div style="text-align: center;">
+      <button type="submit" class="coral-small-button" style="width: 100%; max-width: 300px;">Запази</button>
+    </div>
+  </form>
 </div>
-
-<h2>Смяна на парола</h2>
-
-{% if error %}
-  <p style="color: red;">{{ error }}</p>
-{% endif %}
-{% if success %}
-  <p style="color: green;">{{ success }}</p>
-{% endif %}
-
-<form method="POST">
-  <div style="margin-bottom: 10px;">
-    <label>Текуща парола:</label><br />
-    <input type="password" name="current_password" required />
-  </div>
-  <div style="margin-bottom: 10px;">
-    <label>Нова парола:</label><br />
-    <input type="password" name="new_password" required />
-  </div>
-  <div style="margin-bottom: 10px;">
-    <label>Потвърди новата парола:</label><br />
-    <input type="password" name="confirm_password" required />
-  </div>
-  <button type="submit" style="padding: 6px 12px; background-color: #3b82f6; color: white; border: none; border-radius: 4px;">Запази</button>
-</form>
 {% endblock %}

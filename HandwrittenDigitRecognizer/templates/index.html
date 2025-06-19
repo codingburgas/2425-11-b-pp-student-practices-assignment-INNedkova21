@@ -4,14 +4,22 @@
     <meta charset="UTF-8" />
     <title>Handwritten Digit Recognizer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Добавяме Font Awesome за икони (по желание) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
-<body>
-  <div class="index-content">
+<body onload="fadeInBody()">
+  <div class="index-content fade-in">
     <h1>Handwritten Digit Recognizer</h1>
     <div class="buttons-container">
-        <a href="{{ url_for('auth.login') }}" class="button">Вход</a>
-        <a href="{{ url_for('auth.register') }}" class="button">Регистрация</a>
+        <a href="{{ url_for('auth.login') }}" class="button"><i class="fas fa-sign-in-alt"></i> Вход</a>
+        <a href="{{ url_for('auth.register') }}" class="button"><i class="fas fa-user-plus"></i> Регистрация</a>
     </div>
   </div>
+
+  <script>
+    function fadeInBody() {
+      document.querySelector('.index-content').classList.add('show');
+    }
+  </script>
 </body>
 </html>

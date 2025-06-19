@@ -21,7 +21,7 @@
     <form method="POST" action="{{ url_for('ai.upload') }}" enctype="multipart/form-data">
         <label for="image">Избери .png файл:</label>
         <input type="file" id="image" name="image" accept=".png" required>
-        <button type="submit" class="button">Разпознай</button>
+        <button type="submit" class="button coral-small-button">Разпознай</button>
     </form>
 
     {% if prediction is not none %}
