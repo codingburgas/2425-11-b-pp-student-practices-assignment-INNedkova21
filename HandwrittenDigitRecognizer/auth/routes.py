@@ -17,7 +17,7 @@ def login():
     - POST: Validate credentials and log user in
     """
     if 'first_name' in session and 'last_name' in session:
-        flash("Вече сте влезли в системата.", "info")
+        # flash("Вече сте влезли в системата.", "info")
         return redirect(url_for('main.home'))
 
     form = LoginForm()

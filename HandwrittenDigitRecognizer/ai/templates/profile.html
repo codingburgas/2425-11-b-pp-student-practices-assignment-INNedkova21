@@ -1,46 +1,75 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block title %}Профил{% endblock %}
 
 {% block content %}
-<div class="form-container upload-form" style="max-width: 500px; margin: 40px auto; padding: 30px; text-align: center;">
-  <h1 style="color: #2c3e50; margin-bottom: 20px;">Профил</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}" />
 
-  <div style="margin-bottom: 30px; line-height: 1.8; text-align: left;">
-    <p><strong>Име:</strong> {{ current_user.FirstName }}</p>
-    <p><strong>Фамилия:</strong> {{ current_user.LastName }}</p>
-    <p><strong>Имейл:</strong> {{ current_user.Email }}</p>
-    <p><strong>Създаден на:</strong> {{ current_user.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</p>
-  </div>
+<div class="profile-container">
+    <h1 class="profile-title">Моят профил</h1>
+    <p class="profile-subtitle">
+        Управлявайте вашите лични данни и парола
+    </p>
 
-  <h2 style="color: #ff6f61; margin-bottom: 15px;">Смяна на парола</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
 
-  {% if error %}
-    <p style="color: #dc2626; font-weight: 600;">{{ error }}</p>
-  {% endif %}
-  {% if success %}
-    <p style="color: #16a34a; font-weight: 600;">{{ success }}</p>
-  {% endif %}
+    <div class="profile-sections">
+        <div class="profile-card personal-info-v2">
+            <div class="profile-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="profile-main-info">
+                <div class="profile-name">{{ current_user.FirstName }} {{ current_user.LastName }}</div>
+                <div class="profile-email"><i class="fas fa-envelope"></i> {{ current_user.Email }}</div>
+                <span class="role-badge role-{{ current_user.Role.lower() }}">
+                    {% if current_user.Role == 'Administrator' %}
+                        <i class="fas fa-crown"></i>
+                    {% else %}
+                        <i class="fas fa-user"></i>
+                    {% endif %}
+                    {{ current_user.Role }}
+                </span>
+            </div>
+            <ul class="profile-details-list">
+                <li>
+                    <i class="fas fa-calendar-alt"></i>
+                    Регистриран на: <span>{{ current_user.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</span>
+                </li>
+            </ul>
+        </div>
 
-  <form method="POST" style="text-align: left;">
-    <div style="margin-bottom: 15px;">
-      <label for="current_password">Текуща парола:</label>
-      <input type="password" id="current_password" name="current_password" required
-             style="width: 100%; padding: 10px; background-color: #ffffff; color: #2c3e50; border: 1.5px solid #3b82f6; border-radius: 6px;" />
+        <div class="profile-card">
+            <div class="password-section">
+                <h2 class="section-title">Промяна на парола</h2>
+                <form method="POST" action="{{ url_for('ai.profile') }}">
+                    <div class="form-group">
+                        <label for="current_password" class="form-label">Текуща парола</label>
+                        <input type="password" id="current_password" name="current_password" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new_password" class="form-label">Нова парола</label>
+                        <input type="password" id="new_password" name="new_password" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password" class="form-label">Потвърдете новата парола</label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-key"></i>
+                        Промени парола
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
-    <div style="margin-bottom: 15px;">
-      <label for="new_password">Нова парола:</label>
-      <input type="password" id="new_password" name="new_password" required
-             style="width: 100%; padding: 10px; background-color: #ffffff; color: #2c3e50; border: 1.5px solid #3b82f6; border-radius: 6px;" />
-    </div>
-    <div style="margin-bottom: 20px;">
-      <label for="confirm_password">Потвърди новата парола:</label>
-      <input type="password" id="confirm_password" name="confirm_password" required
-             style="width: 100%; padding: 10px; background-color: #ffffff; color: #2c3e50; border: 1.5px solid #3b82f6; border-radius: 6px;" />
-    </div>
-    <div style="text-align: center;">
-      <button type="submit" class="coral-small-button" style="width: 100%; max-width: 300px;">Запази</button>
-    </div>
-  </form>
 </div>
 {% endblock %}

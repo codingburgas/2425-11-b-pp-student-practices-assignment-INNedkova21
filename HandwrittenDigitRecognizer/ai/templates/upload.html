@@ -3,34 +3,153 @@
 {% block title %}Качване на изображение{% endblock %}
 
 {% block content %}
-<div class="form-container upload-form">
-    <h1>Качи изображение</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='upload.css') }}" />
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flashes">
-          {% for category, message in messages %}
-            {% if message %}
-              <div class="alert alert-{{ category }}">{{ message }}</div>
-            {% endif %}
-          {% endfor %}
+<div class="upload-container">
+    <div class="upload-card">
+        <h1 class="upload-title">Качи изображение</h1>
+        <p class="upload-subtitle">
+            Качете PNG файл с ръкописна цифра и нашата AI система ще я разпознае мигновено
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flashes">
+              {% for category, message in messages %}
+                {% if message %}
+                  <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('ai.upload') }}" enctype="multipart/form-data" id="uploadForm">
+            <div class="drag-drop-area" id="dragDropArea">
+                <input type="file" id="image" name="image" accept=".png" required class="file-input">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <div class="drag-text">Кликнете или влачете файл тук</div>
+                <div class="drag-subtext">Поддържа се само PNG формат</div>
+            </div>
+
+            <div class="file-info" id="fileInfo">
+                <div class="file-name" id="fileName"></div>
+                <div class="file-size" id="fileSize"></div>
+            </div>
+
+            <button type="submit" class="upload-button" id="uploadButton" disabled>
+                <i class="fas fa-magic"></i>
+                Разпознай цифрата
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Анализиране на изображението...</div>
         </div>
-      {% endif %}
-    {% endwith %}
 
-    <form method="POST" action="{{ url_for('ai.upload') }}" enctype="multipart/form-data">
-        <label for="image">Избери .png файл:</label>
-        <input type="file" id="image" name="image" accept=".png" required>
-        <button type="submit" class="button coral-small-button">Разпознай</button>
-    </form>
-
-    {% if prediction is not none %}
-        <div class="result">
-            <h2>Разпознато число: {{ prediction }}</h2>
-            {% if confidence %}
-                <p>Увереност: {{ confidence }}%</p>
-            {% endif %}
-        </div>
-    {% endif %}
+        {% if prediction is not none %}
+            <div class="result-card">
+                <h2 class="result-title">Резултат от разпознаването</h2>
+                <div class="prediction-number">{{ prediction }}</div>
+                {% if confidence %}
+                    <div class="confidence-text">Увереност в прогнозата</div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: {{ confidence }}%"></div>
+                    </div>
+                    <div class="confidence-text">{{ confidence }}%</div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dragDropArea = document.getElementById('dragDropArea');
+        const fileInput = document.getElementById('image');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const uploadButton = document.getElementById('uploadButton');
+        const uploadForm = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+
+        // Drag and drop functionality
+        dragDropArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        dragDropArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+
+        dragDropArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                handleFileSelect(this.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            // Check if file is PNG
+            if (!file.type.includes('png')) {
+                alert('Моля, изберете PNG файл!');
+                return;
+            }
+
+            // Display file info
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.style.display = 'block';
+
+            // Enable upload button
+            uploadButton.disabled = false;
+
+            // Add visual feedback
+            dragDropArea.style.borderColor = '#16a34a';
+            dragDropArea.style.background = 'rgba(22, 163, 74, 0.1)';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Form submission
+        uploadForm.addEventListener('submit', function(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Моля, изберете файл!');
+                return;
+            }
+
+            // Show loading
+            loading.style.display = 'block';
+            uploadButton.disabled = true;
+            uploadButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Обработване...';
+        });
+
+        // Add click effect to drag area
+        dragDropArea.addEventListener('click', function() {
+            fileInput.click();
+        });
+    });
+</script>
 {% endblock %}

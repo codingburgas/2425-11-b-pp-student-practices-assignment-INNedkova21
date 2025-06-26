@@ -4,59 +4,111 @@
 {% block title %}Вход{% endblock %}
 
 {% block content %}
-<div class="registration-wrapper fade-in">
-    <div class="form-container custom-register-form">
-        <h1 class="page-title"><i class="fas fa-sign-in-alt"></i> Вход</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}" />
+
+<div class="login-container">
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    
+    <div class="login-card">
+        <h1 class="login-title">
+            <i class="fas fa-sign-in-alt"></i>
+            Вход
+        </h1>
+        <p class="login-subtitle">
+            Влезте в своя акаунт за достъп до системата за разпознаване на цифри
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <form method="POST" action="{{ url_for('auth.login') }}">
             {{ form.hidden_tag() }}
 
             <div class="form-group">
-                <label for="email">Имейл</label>
-                {{ form.email(id="email", placeholder="Въведете имейл") }}
+                <label for="email" class="form-label">
+                    <i class="fas fa-envelope"></i>
+                    Имейл
+                </label>
+                {{ form.email(id="email", class="form-input", placeholder="Въведете вашия имейл") }}
                 {% if form.email.errors %}
-                    <div class="text-danger">
+                    <div class="error-message">
                         {% for error in form.email.errors %}
-                            <small>{{ error }}</small><br>
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ error }}
                         {% endfor %}
                     </div>
                 {% endif %}
             </div>
 
             <div class="form-group">
-                <label for="password">Парола</label>
-                {{ form.password(id="password", placeholder="********") }}
+                <label for="password" class="form-label">
+                    <i class="fas fa-lock"></i>
+                    Парола
+                </label>
+                {{ form.password(id="password", class="form-input", placeholder="Въведете вашата парола") }}
                 {% if form.password.errors %}
-                    <div class="text-danger">
+                    <div class="error-message">
                         {% for error in form.password.errors %}
-                            <small>{{ error }}</small><br>
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ error }}
                         {% endfor %}
                     </div>
                 {% endif %}
             </div>
 
             <div class="form-group">
-                {{ form.submit(class="coral-button full-width-button") }}
+                {{ form.submit(class="login-btn") }}
             </div>
-
-            <p class="text-center">Нямате акаунт? <a href="{{ url_for('auth.register') }}">Регистрирайте се.</a></p>
         </form>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="alert alert-success mt-3 text-center">
-                    {% for category, message in messages %}
-                        <p>{{ message }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+        <div class="register-link">
+            <p>
+                Нямате акаунт? 
+                <a href="{{ url_for('auth.register') }}">
+                    <i class="fas fa-user-plus"></i>
+                    Регистрирайте се
+                </a>
+            </p>
+        </div>
     </div>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelector('.fade-in')?.classList.add('show');
-  });
+    document.addEventListener("DOMContentLoaded", function() {
+        // Add animation class to card
+        const card = document.querySelector('.login-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+
+        // Add focus effects to inputs
+        const inputs = document.querySelectorAll('.form-input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    });
 </script>
 {% endblock %}

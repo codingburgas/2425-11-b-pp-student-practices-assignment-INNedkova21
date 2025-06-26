@@ -3,19 +3,68 @@
 {% block title %}Начална страница{% endblock %}
 
 {% block content %}
-<div class="form-container home-container fade-in">
-    <h1 class="page-title">Как мога да ти помогна?</h1>
-    <p class="intro-text">Избери дали искаш да качиш изображение или да нарисуваш цифра:</p>
+<link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}" />
 
-    <div class="buttons-container">
-        <a href="{{ url_for('ai.upload') }}" class="button"><i class="fas fa-upload"></i> Качи PNG</a>
-        <a href="{{ url_for('ai.draw') }}" class="button"><i class="fas fa-pen"></i> Нарисувай цифра</a>
+<div class="hero-section fade-in">
+    <h1 class="welcome-title">Добре дошли в Handwritten Digit Recognizer</h1>
+    <p class="welcome-subtitle">
+        Изкуствен интелект за разпознаване на ръкописни цифри с висока точност. 
+        Изберете как искате да тествате нашата AI система.
+    </p>
+
+    <div class="options-grid">
+        <div class="option-card" onclick="window.location.href='{{ url_for('ai.upload') }}'">
+            <i class="fas fa-upload option-icon"></i>
+            <h3 class="option-title">Качи PNG файл</h3>
+            <p class="option-description">
+                Качете изображение с ръкописна цифра и ще получите мигновен резултат от нашата AI система.
+            </p>
+            <a href="{{ url_for('ai.upload') }}" class="option-button">
+                <i class="fas fa-upload"></i>
+                Качи файл
+            </a>
+        </div>
+
+        <div class="option-card" onclick="window.location.href='{{ url_for('ai.draw') }}'">
+            <i class="fas fa-paint-brush option-icon"></i>
+            <h3 class="option-title">Нарисувай цифра</h3>
+            <p class="option-description">
+                Нарисувайте цифра с мишката и вижте как AI я разпознава в реално време.
+            </p>
+            <a href="{{ url_for('ai.draw') }}" class="option-button">
+                <i class="fas fa-paint-brush"></i>
+                Нарисувай
+            </a>
+        </div>
     </div>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    document.querySelector('.fade-in')?.classList.add('show');
-  });
+    document.addEventListener("DOMContentLoaded", function() {
+        // Trigger fade in
+        document.querySelector('.fade-in')?.classList.add('show');
+
+        // Add hover effects for option cards
+        document.querySelectorAll('.option-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Add click effects for buttons
+        document.querySelectorAll('.option-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.stopPropagation();
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+        });
+    });
 </script>
 {% endblock %}

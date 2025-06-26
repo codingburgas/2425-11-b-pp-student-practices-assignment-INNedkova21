@@ -3,64 +3,68 @@
 {% block title %}История{% endblock %}
 
 {% block content %}
-{% if images %}
-<div style="width: 100%; display: flex; justify-content: center;">
-  <table style="width: 100%; border-collapse: collapse; background-color: #f9fafb; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
-    <thead>
-      <tr style="background-color: #e2e8f0;">
-        <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: left;">Автор</th>
-        <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: left;">Имейл</th>
-        <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: left;">Име на файл</th>
-        <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: left;">Качен на</th>
-        <th style="border: 1px solid #ddd; padding: 15px 20px; text-align: center;">Действия</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for img in images %}
-      <tr>
-        <td style="border: 1px solid #ddd; padding: 12px 20px;">
-          {% if current_user.Role == 'Administrator' and img.author_name %}
-            {{ img.author_name }}
-          {% else %}
-            {{ current_user.FirstName }} {{ current_user.LastName }}
-          {% endif %}
-        </td>
-        <td style="border: 1px solid #ddd; padding: 12px 20px;">
-          {% if current_user.Role == 'Administrator' and img.author_email %}
-            {{ img.author_email }}
-          {% else %}
-            {{ current_user.Email }}
-          {% endif %}
-        </td>
-        <td style="border: 1px solid #ddd; padding: 12px 20px;">
-          {{ img.filename }}
-        </td>
-        <td style="border: 1px solid #ddd; padding: 12px 20px;">
-          {{ img.upload_time }}
-        </td>
-        <td style="border: 1px solid #ddd; padding: 12px 20px; text-align: center;">
-          <a href="{{ url_for('ai.download_image', filename=img.filename) }}" class="button" style="background-color: #22c55e; color: white; padding: 4px 10px; font-size: 0.85rem; border-radius: 4px; text-decoration: none; margin-right: 8px; display: inline-flex; align-items: center; gap: 5px;">
-            <i class="fas fa-download"></i> Изтегли
-          </a>
-          <form action="{{ url_for('ai.delete_image', filename=img.filename) }}" method="post" style="display:inline;" onsubmit="return confirm('Сигурен ли си, че искаш да изтриеш тази снимка?');">
-            <button type="submit" class="button" style="background-color: #dc2626; color: white; padding: 4px 10px; font-size: 0.85rem; border: none; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
-              <i class="fas fa-trash-alt"></i> Изтрий
-            </button>
-          </form>
-          {% if current_user.Role == 'Administrator' and img.user_id %}
-          <form action="{{ url_for('ai.delete_user', user_id=img.user_id) }}" method="post" style="display:inline;" onsubmit="return confirm('Сигурен ли си, че искаш да изтриеш този потребител?');">
-            <button type="submit" class="button" style="background-color: #f97316; color: white; padding: 4px 10px; font-size: 0.85rem; border: none; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
-              <i class="fas fa-user-slash"></i> Изтрий акаунт
-            </button>
-          </form>
-          {% endif %}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<link rel="stylesheet" href="{{ url_for('static', filename='history.css') }}" />
+<div class="history-container">
+    <div class="admin-card">
+        <h1 class="history-title">История на качените изображения</h1>
+        <p class="history-subtitle">Тук можеш да видиш всички качени файлове и действията, които можеш да извършиш с тях.</p>
+
+        {% if images %}
+        <div style="overflow-x: auto;">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th>Автор</th>
+                        <th>Имейл</th>
+                        <th>Име на файл</th>
+                        <th>Качен на</th>
+                        <th class="actions-header">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for img in images %}
+                    <tr>
+                        <td>
+                            {% if current_user.Role == 'Administrator' and img.author_name %}
+                                {{ img.author_name }}
+                            {% else %}
+                                {{ current_user.FirstName }} {{ current_user.LastName }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if current_user.Role == 'Administrator' and img.author_email %}
+                                {{ img.author_email }}
+                            {% else %}
+                                {{ current_user.Email }}
+                            {% endif %}
+                        </td>
+                        <td>{{ img.filename }}</td>
+                        <td>{{ img.upload_time }}</td>
+                        <td class="actions-cell">
+                            <a href="{{ url_for('ai.download_image', filename=img.filename) }}" class="history-btn download-btn">
+                                <i class="fas fa-download"></i> Изтегли
+                            </a>
+                            <form action="{{ url_for('ai.delete_image', filename=img.filename) }}" method="post" class="inline-form" onsubmit="return confirm('Сигурен ли си, че искаш да изтриеш тази снимка?');">
+                                <button type="submit" class="history-btn delete-btn">
+                                    <i class="fas fa-trash-alt"></i> Изтрий
+                                </button>
+                            </form>
+                            {% if current_user.Role == 'Administrator' and img.user_id %}
+                            <form action="{{ url_for('ai.delete_user', user_id=img.user_id) }}" method="post" class="inline-form" onsubmit="return confirm('Сигурен ли си, че искаш да изтриеш този потребител?');">
+                                <button type="submit" class="history-btn user-delete-btn">
+                                    <i class="fas fa-user-slash"></i> Изтрий акаунт
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="no-history">Все още нямаш качени снимки.</div>
+        {% endif %}
+    </div>
 </div>
-{% else %}
-  <p>Все още нямаш качени снимки.</p>
-{% endif %}
 {% endblock %}

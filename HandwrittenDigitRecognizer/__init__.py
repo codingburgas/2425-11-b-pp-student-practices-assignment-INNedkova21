@@ -1,20 +1,23 @@
 from flask import Flask
 from HandwrittenDigitRecognizer.ai import ai
+from HandwrittenDigitRecognizer.config import Config
 from HandwrittenDigitRecognizer.errors import errors
-from config import Config
 from HandwrittenDigitRecognizer.extensions import db, login_manager, mail
 from HandwrittenDigitRecognizer.main.routes import main
 from HandwrittenDigitRecognizer.auth import auth
 from HandwrittenDigitRecognizer.models.user import User
 
 def create_app(config_class=Config):
-    app = Flask(__name__)
+    app = Flask(__name__, 
+                static_folder='static',
+                template_folder='templates')
     app.config.from_object(config_class)
 
     db.init_app(app)
     mail.init_app(app)
     login_manager.init_app(app)
 
+    # Register blueprints
     app.register_blueprint(main)
     app.register_blueprint(auth)
     app.register_blueprint(ai)

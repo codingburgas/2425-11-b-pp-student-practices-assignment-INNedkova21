@@ -1,8 +1,9 @@
 import base64
 import os
+import json
 from io import BytesIO
 import numpy as np
-from flask import render_template, request, flash, redirect, url_for
+from flask import render_template, request, flash, redirect, url_for, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from PIL import Image
@@ -432,5 +433,33 @@ def admin_user_details(user_id):
 
     user = User.query.get_or_404(user_id)
     predictions = Prediction.query.filter_by(UserID=user.ID).order_by(Prediction.CreatedAt.desc()).all()
-
+    for p in predictions:
+        p.filename = os.path.basename(p.ImagePath)
     return render_template('admin_user_details.html', user=user, predictions=predictions)
+
+@ai.route('/delete_prediction/<int:prediction_id>', methods=['DELETE'])
+@login_required
+def delete_prediction(prediction_id):
+    """
+    Deletes a specific prediction by ID.
+    Returns JSON response for AJAX requests.
+    Only administrators can perform this action.
+    """
+    if current_user.Role != 'Administrator':
+        return jsonify({'success': False, 'error': 'Unauthorized'}), 403
+
+    prediction = Prediction.query.get_or_404(prediction_id)
+    
+    try:
+        # Delete the image file if it exists
+        if os.path.exists(prediction.ImagePath):
+            os.remove(prediction.ImagePath)
+        
+        # Delete the prediction record from database
+        db.session.delete(prediction)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Prediction deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500

@@ -4,72 +4,188 @@
 {% block title %}Регистрация{% endblock %}
 
 {% block content %}
-<div class="registration-wrapper fade-in">
-    <div class="form-container custom-register-form">
-        <h1 class="page-title"><i class="fas fa-user-plus"></i> Регистрация</h1>
+<link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}" />
+
+<div class="register-container">
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    
+    <div class="register-card">
+        <h1 class="register-title">
+            <i class="fas fa-user-plus"></i>
+            Регистрация
+        </h1>
+        <p class="register-subtitle">
+            Създайте нов акаунт за достъп до системата за разпознаване на цифри
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <form method="POST">
             {{ form.hidden_tag() }}
 
             <div class="form-group">
-                <label for="first_name">Име</label>
-                {{ form.first_name(id="first_name", placeholder="Въведете вашето име") }}
+                <label for="first_name" class="form-label">
+                    <i class="fas fa-user"></i>
+                    Име
+                </label>
+                {{ form.first_name(id="first_name", class="form-input", placeholder="Въведете вашето име") }}
+                {% if form.first_name.errors %}
+                    <div class="error-message">
+                        {% for error in form.first_name.errors %}
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="form-group">
-                <label for="last_name">Фамилия</label>
-                {{ form.last_name(id="last_name", placeholder="Въведете вашата фамилия") }}
+                <label for="last_name" class="form-label">
+                    <i class="fas fa-user"></i>
+                    Фамилия
+                </label>
+                {{ form.last_name(id="last_name", class="form-input", placeholder="Въведете вашата фамилия") }}
+                {% if form.last_name.errors %}
+                    <div class="error-message">
+                        {% for error in form.last_name.errors %}
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="form-group">
-                <label for="email">Имейл</label>
-                {{ form.email(id="email", placeholder="Въведете вашия имейл") }}
+                <label for="email" class="form-label">
+                    <i class="fas fa-envelope"></i>
+                    Имейл
+                </label>
+                {{ form.email(id="email", class="form-input", placeholder="Въведете вашия имейл") }}
+                {% if form.email.errors %}
+                    <div class="error-message">
+                        {% for error in form.email.errors %}
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="form-group">
-                <label for="password">Парола</label>
-                {{ form.password(id="password", placeholder="********") }}
+                <label for="password" class="form-label">
+                    <i class="fas fa-lock"></i>
+                    Парола
+                </label>
+                {{ form.password(id="password", class="form-input", placeholder="Въведете вашата парола") }}
+                {% if form.password.errors %}
+                    <div class="error-message">
+                        {% for error in form.password.errors %}
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="form-group">
-                <label for="confirm_password">Потвърдете паролата</label>
-                {{ form.confirm_password(id="confirm_password", placeholder="********") }}
+                <label for="confirm_password" class="form-label">
+                    <i class="fas fa-lock"></i>
+                    Потвърдете паролата
+                </label>
+                {{ form.confirm_password(id="confirm_password", class="form-input", placeholder="Повторете вашата парола") }}
+                {% if form.confirm_password.errors %}
+                    <div class="error-message">
+                        {% for error in form.confirm_password.errors %}
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
             </div>
 
             <div class="form-group">
-                <label>Изберете роля</label>
-                <div>
-                    <input type="radio" id="user" name="role" value="User" checked>
-                    <label for="user">Потребител</label>
+                <label class="form-label">
+                    <i class="fas fa-user-tag"></i>
+                    Изберете роля
+                </label>
+                <div class="role-selection">
+                    <div class="role-option">
+                        <input type="radio" id="user" name="role" value="User" checked>
+                        <label for="user">Потребител</label>
+                    </div>
+                    <div class="role-option">
+                        <input type="radio" id="admin" name="role" value="Administrator">
+                        <label for="admin">Администратор</label>
+                    </div>
                 </div>
-                <div>
-                    <input type="radio" id="admin" name="role" value="Administrator">
-                    <label for="admin">Администратор</label>
-                </div>
             </div>
 
             <div class="form-group">
-                {{ form.submit(class="coral-button full-width-button") }}
+                {{ form.submit(class="register-btn") }}
             </div>
-
-            <p class="text-center">Вече имате акаунт? <a href="{{ url_for('auth.login') }}">Влезте тук</a>.</p>
         </form>
 
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="alert alert-success mt-3">
-                    {% for category, message in messages %}
-                        <p>{{ message }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+        <div class="login-link">
+            <p>
+                Вече имате акаунт? 
+                <a href="{{ url_for('auth.login') }}">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Влезте тук
+                </a>
+            </p>
+        </div>
     </div>
 </div>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelector('.fade-in')?.classList.add('show');
-  });
+    document.addEventListener("DOMContentLoaded", function() {
+        // Add animation class to card
+        const card = document.querySelector('.register-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+
+        // Add focus effects to inputs
+        const inputs = document.querySelectorAll('.form-input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Add hover effects to role options
+        const roleOptions = document.querySelectorAll('.role-option');
+        roleOptions.forEach(option => {
+            option.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            
+            option.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+    });
 </script>
 {% endblock %}
