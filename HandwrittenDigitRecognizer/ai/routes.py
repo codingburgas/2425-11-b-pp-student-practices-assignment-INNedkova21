@@ -1,10 +1,8 @@
 import base64
 import os
-import json
 from io import BytesIO
 import numpy as np
-from flask import render_template, request, flash, redirect, url_for, jsonify
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import render_template, flash, redirect, url_for, jsonify
 from werkzeug.utils import secure_filename
 from PIL import Image
 from scipy.ndimage import center_of_mass, shift, binary_dilation
@@ -341,101 +339,10 @@ def delete_image(filename):
 
     if next_page == 'admin_user_details':
         # Optional redirection to admin user details page
-        return redirect(url_for('ai.admin_user_details'))
+        return redirect(url_for('users.admin_user_details'))
     else:
         return redirect(url_for('ai.history'))
 
-
-@ai.route('/delete_user/<int:user_id>', methods=['POST'])
-@login_required
-def delete_user(user_id):
-    """
-    Deletes a user and all their prediction records.
-    Only administrators can perform this action.
-    """
-    if current_user.Role != 'Administrator':
-        abort(403)
-
-    user_to_delete = User.query.get_or_404(user_id)
-
-    if user_to_delete.ID == current_user.ID:
-        # Prevent users from deleting their own account
-        flash('Не можеш да изтриеш собствения си акаунт!', 'warning')
-        return redirect(url_for('ai.history'))
-
-    try:
-        # Delete all predictions and the user record
-        Prediction.query.filter_by(UserID=user_to_delete.ID).delete()
-        db.session.delete(user_to_delete)
-        db.session.commit()
-        # flash(f'Потребителят {user_to_delete.Email} беше изтрит успешно.', 'success')
-    except Exception as e:
-        db.session.rollback()
-        # flash('Възникна грешка при изтриването на потребителя: ' + str(e), 'danger')
-
-    return redirect(url_for('ai.history'))
-
-
-@ai.route('/profile', methods=['GET', 'POST'])
-@login_required
-def profile():
-    """
-    Allows a logged-in user to change their password.
-    Validates current password and checks new password strength.
-    """
-    error = None
-    success = None
-
-    if request.method == 'POST':
-        current_password = request.form.get('current_password')
-        new_password = request.form.get('new_password')
-        confirm_password = request.form.get('confirm_password')
-
-        if not check_password_hash(current_user.Password, current_password):
-            error = "Текущата парола е грешна."
-        elif new_password != confirm_password:
-            error = "Новата парола не съвпада с потвърждението."
-        elif len(new_password) < 6:
-            error = "Паролата трябва да е поне 6 символа."
-        else:
-            current_user.Password = generate_password_hash(new_password)
-            try:
-                db.session.commit()
-                success = "Паролата е сменена успешно."
-            except:
-                db.session.rollback()
-                error = "Възникна грешка при смяната на паролата."
-
-    return render_template('profile.html', error=error, success=success)
-
-
-@ai.route('/admin/users')
-@login_required
-def admin_users():
-    """
-    Displays a list of all users.
-    Only accessible by administrators.
-    """
-    if current_user.Role != 'Administrator':
-        abort(403)
-    users = User.query.order_by(User.CreatedAt.desc()).all()
-    return render_template('admin_users.html', users=users)
-
-@ai.route('/admin/user/<int:user_id>')
-@login_required
-def admin_user_details(user_id):
-    """
-    Shows details and prediction history for a specific user.
-    Only accessible by administrators.
-    """
-    if current_user.Role != 'Administrator':
-        abort(403)
-
-    user = User.query.get_or_404(user_id)
-    predictions = Prediction.query.filter_by(UserID=user.ID).order_by(Prediction.CreatedAt.desc()).all()
-    for p in predictions:
-        p.filename = os.path.basename(p.ImagePath)
-    return render_template('admin_user_details.html', user=user, predictions=predictions)
 
 @ai.route('/delete_prediction/<int:prediction_id>', methods=['DELETE'])
 @login_required

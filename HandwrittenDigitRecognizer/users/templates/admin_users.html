@@ -3,7 +3,7 @@
 {% block title %}Управление на потребители{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='admin.css') }}" />
+<link rel="stylesheet" href="{{ url_for('users.static', filename='admin.css') }}">
 
 <div class="admin-container">
     <div class="admin-card">
@@ -71,7 +71,7 @@
                         <td>{{ user.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</td>
                         <td>
                             <div class="action-buttons">
-                                <a href="{{ url_for('ai.admin_user_details', user_id=user.ID) }}" class="view-btn">
+                                <a href="{{ url_for('users.admin_user_details', user_id=user.ID) }}" class="view-btn">
                                     <i class="fas fa-eye"></i>
                                     Детайли
                                 </a>

@@ -3,7 +3,7 @@
 {% block title %}История{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='history.css') }}" />
+<link rel="stylesheet" href="{{ url_for('ai.static', filename='history.css') }}">
 <div class="history-container">
     <div class="admin-card">
         <h1 class="history-title">История на качените изображения</h1>
@@ -50,7 +50,7 @@
                                 </button>
                             </form>
                             {% if current_user.Role == 'Administrator' and img.user_id %}
-                            <form action="{{ url_for('ai.delete_user', user_id=img.user_id) }}" method="post" class="inline-form" onsubmit="return confirm('Сигурен ли си, че искаш да изтриеш този потребител?');">
+                            <form action="{{ url_for('users.delete_user', user_id=img.user_id) }}" method="post" class="inline-form" onsubmit="return confirm('Сигурен ли си, че искаш да изтриеш този потребител?');">
                                 <button type="submit" class="history-btn user-delete-btn">
                                     <i class="fas fa-user-slash"></i> Изтрий акаунт
                                 </button>

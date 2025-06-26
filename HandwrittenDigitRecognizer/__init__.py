@@ -1,4 +1,5 @@
 from flask import Flask
+from HandwrittenDigitRecognizer.users import users
 from HandwrittenDigitRecognizer.ai import ai
 from HandwrittenDigitRecognizer.config import Config
 from HandwrittenDigitRecognizer.errors import errors
@@ -22,6 +23,7 @@ def create_app(config_class=Config):
     app.register_blueprint(auth)
     app.register_blueprint(ai)
     app.register_blueprint(errors)
+    app.register_blueprint(users)
 
     with app.app_context():
         db.create_all()

@@ -3,7 +3,7 @@
 {% block title %}Профил{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='profile.css') }}" />
+<link rel="stylesheet" href="{{ url_for('users.static', filename='profile.css') }}">
 
 <div class="profile-container">
     <h1 class="profile-title">Моят профил</h1>
@@ -50,7 +50,7 @@
         <div class="profile-card">
             <div class="password-section">
                 <h2 class="section-title">Промяна на парола</h2>
-                <form method="POST" action="{{ url_for('ai.profile') }}">
+                <form method="POST" action="{{ url_for('users.profile') }}">
                     <div class="form-group">
                         <label for="current_password" class="form-label">Текуща парола</label>
                         <input type="password" id="current_password" name="current_password" class="form-input" required>

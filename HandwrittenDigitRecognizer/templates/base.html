@@ -227,12 +227,12 @@
         История
       </a>
       {% if current_user.is_authenticated and current_user.Role == 'Administrator' %}
-        <a href="{{ url_for('ai.admin_users') }}" class="nav-link">
+        <a href="{{ url_for('users.admin_users') }}" class="nav-link">
           <i class="fas fa-users-cog"></i>
           Потребители
         </a>
       {% endif %}
-      <a href="{{ url_for('ai.profile') }}" class="nav-link">
+      <a href="{{ url_for('users.profile') }}" class="nav-link">
         <i class="fas fa-user"></i>
         Профил
       </a>
