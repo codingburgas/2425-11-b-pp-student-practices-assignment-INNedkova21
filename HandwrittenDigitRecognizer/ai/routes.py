@@ -10,10 +10,13 @@ import numpy as np
 from PIL import Image
 from scipy.ndimage import center_of_mass, shift
 from scipy.ndimage import binary_dilation
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import base64
 from io import BytesIO
 import pickle
+
+# Българска часова зона (UTC+2)
+BULGARIA_TZ = timezone(timedelta(hours=2))
 
 # Get the root directory of the project
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -247,8 +250,10 @@ def history():
         author_email = user.Email if user else "Unknown"
         user_id = user.ID if user else None
 
-        # Форматиране на датата в български формат
-        upload_time_str = prediction.CreatedAt.strftime('%d.%m.%Y %H:%M')
+        # Конвертиране към българска часова зона
+        # Приемаме че CreatedAt е в UTC и го конвертираме към българско време
+        bg_time = prediction.CreatedAt.replace(tzinfo=timezone.utc).astimezone(BULGARIA_TZ)
+        upload_time_str = bg_time.strftime('%d.%m.%Y %H:%M')
         upload_time_dt = prediction.CreatedAt
 
         images.append({
