@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Обратна връзка от потребители</h2>
+    {% if feedbacks %}
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>Потребител</th>
+                    <th>Оценка</th>
+                    <th>Коментар</th>
+                    <th>Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for fb in feedbacks %}
+                <tr>
+                    <td>{{ fb.user.Username }}</td>
+                    <td>{{ fb.Rating }}</td>
+                    <td>{{ fb.Comment or '---' }}</td>
+                    <td>{{ fb.CreatedAt.strftime('%d.%m.%Y %H:%M') }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Все още няма обратна връзка.</p>
+    {% endif %}
+</div>
+{% endblock %}

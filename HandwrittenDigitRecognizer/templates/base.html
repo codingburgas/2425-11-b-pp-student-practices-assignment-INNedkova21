@@ -197,7 +197,7 @@
     <div class="particle"></div>
   </div>
 
-  {% if show_navbar is not defined or show_navbar %}
+{% if show_navbar is not defined or show_navbar %}
   <header>
     <a href="{{ url_for('main.home') }}" class="logo-link">
       <span>Handwritten Digit Recognizer</span>
@@ -226,56 +226,76 @@
         <i class="fas fa-history"></i>
         История
       </a>
-      {% if current_user.is_authenticated and current_user.Role == 'Administrator' %}
-        <a href="{{ url_for('users.admin_users') }}" class="nav-link">
-          <i class="fas fa-users-cog"></i>
-          Потребители
+
+      {% if current_user.is_authenticated %}
+        {% if current_user.Role == 'Administrator' %}
+          <a href="{{ url_for('users.admin_users') }}" class="nav-link">
+            <i class="fas fa-users-cog"></i>
+            Потребители
+          </a>
+          <a href="{{ url_for('users.admin_feedback') }}" class="nav-link">
+            <i class="fas fa-comments"></i>
+            Оценки
+          </a>
+        {% elif current_user.Role == 'User' %}
+          <a href="{{ url_for('users.feedback') }}" class="nav-link">
+            <i class="fas fa-star"></i>
+            Оценете ни
+          </a>
+        {% endif %}
+
+        <a href="{{ url_for('users.profile') }}" class="nav-link">
+          <i class="fas fa-user"></i>
+          Профил
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="nav-link">
+          <i class="fas fa-sign-out-alt"></i>
+          Изход
         </a>
       {% endif %}
-      <a href="{{ url_for('users.profile') }}" class="nav-link">
-        <i class="fas fa-user"></i>
-        Профил
-      </a>
-      <a href="{{ url_for('auth.logout') }}" class="nav-link">
-        <i class="fas fa-sign-out-alt"></i>
-        Изход
-      </a>
     </nav>
   </header>
-  {% endif %}
+{% endif %}
 
-  <main>
-    {% block content %}{% endblock %}
-  </main>
+<main>
+  {% block content %}{% endblock %}
+</main>
 
-  <script>
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.getElementById('nav-menu');
+<script>
+  const hamburger = document.getElementById('hamburger');
+  const navMenu = document.getElementById('nav-menu');
 
-    hamburger.addEventListener('click', () => {
-      navMenu.classList.toggle('active');
+  hamburger.addEventListener('click', () => {
+    navMenu.classList.toggle('active');
+  });
+
+  navMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      navMenu.classList.remove('active');
     });
+  });
 
-    navMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        navMenu.classList.remove('active');
-      });
-    });
+  document.addEventListener('DOMContentLoaded', function() {
+    const main = document.querySelector('main');
+    if (main) {
+      main.style.opacity = '0';
+      main.style.transform = 'translateY(20px)';
+      main.style.transition = 'all 0.6s ease';
+      setTimeout(() => {
+        main.style.opacity = '1';
+        main.style.transform = 'translateY(0)';
+      }, 100);
+    }
+  });
 
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add fade-in effect to main content
-      const main = document.querySelector('main');
-      if (main) {
-        main.style.opacity = '0';
-        main.style.transform = 'translateY(20px)';
-        main.style.transition = 'all 0.6s ease';
-        
-        setTimeout(() => {
-          main.style.opacity = '1';
-          main.style.transform = 'translateY(0)';
-        }, 100);
+  document.addEventListener('click', function(event) {
+    const dropdowns = document.querySelectorAll('.dropdown-menu');
+    dropdowns.forEach(menu => {
+      if (!menu.previousElementSibling.contains(event.target)) {
+        menu.classList.remove('show');
       }
     });
-  </script>
+  });
+</script>
 </body>
 </html>

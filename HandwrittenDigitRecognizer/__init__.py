@@ -7,6 +7,7 @@ from HandwrittenDigitRecognizer.extensions import db, login_manager, mail
 from HandwrittenDigitRecognizer.main.routes import main
 from HandwrittenDigitRecognizer.auth import auth
 from HandwrittenDigitRecognizer.models.user import User
+from .models.feedback import Feedback
 
 def create_app(config_class=Config):
     app = Flask(__name__, 

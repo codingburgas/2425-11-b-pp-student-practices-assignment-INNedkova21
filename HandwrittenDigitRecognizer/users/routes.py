@@ -1,14 +1,12 @@
-# HandwrittenDigitRecognizer/users/routes.py
-
 from flask import render_template, request, redirect, url_for, flash, abort, jsonify
 from flask_login import current_user, login_required
 from werkzeug.security import check_password_hash, generate_password_hash
+from ..models.feedback import Feedback
 from ..models.user import User
 from ..models.prediction import Prediction
 from ..extensions import db
 from . import users
 import os
-from datetime import datetime
 
 upload_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
 
@@ -86,3 +84,31 @@ def delete_user(user_id):
         flash('Грешка при изтриването: ' + str(e), 'danger')
 
     return redirect(url_for('users.admin_users'))
+
+
+@users.route('/feedback', methods=['GET', 'POST'])
+@login_required
+def feedback():
+    if current_user.Role != 'User':
+        abort(403)
+
+    if request.method == 'POST':
+        rating = request.form.get('rating')
+        comment = request.form.get('comment')
+
+        feedback = Feedback(UserID=current_user.ID, Rating=int(rating), Comment=comment)
+        db.session.add(feedback)
+        db.session.commit()
+        flash('Благодарим за обратната връзка!', 'success')
+        return redirect(url_for('users.feedback'))
+
+    return render_template('feedback.html')
+
+@users.route('/admin/feedback', endpoint='admin_feedback')
+@login_required
+def admin_feedback():
+    if current_user.Role != 'Administrator':
+        abort(403)
+
+    all_feedback = Feedback.query.order_by(Feedback.CreatedAt.desc()).all()
+    return render_template('admin_feedback.html', feedbacks=all_feedback)
