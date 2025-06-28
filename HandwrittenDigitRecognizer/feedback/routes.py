@@ -7,7 +7,9 @@ from ..models.prediction import Prediction
 from ..extensions import db
 from . import feedback
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+BULGARIA_TZ = timezone(timedelta(hours=2))
 
 @feedback.route('/feedback', methods=['GET', 'POST'])
 @login_required

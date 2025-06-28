@@ -7,9 +7,12 @@ from ..models.prediction import Prediction
 from ..extensions import db
 from . import users
 import os
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 upload_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
+
+# Българска часова зона (UTC+2)
+BULGARIA_TZ = timezone(timedelta(hours=2))
 
 
 @users.route('/profile', methods=['GET', 'POST'])
@@ -87,3 +90,33 @@ def delete_user(user_id):
         flash('Грешка при изтриването: ' + str(e), 'danger')
 
     return redirect(url_for('users.admin_users'))
+
+
+@users.route('/admin/feedback', endpoint='admin_feedback')
+@login_required
+def admin_feedback():
+    if current_user.Role != 'Administrator':
+        abort(403)
+
+    all_feedback = Feedback.query.order_by(Feedback.CreatedAt.desc()).all()
+    feedback_list = []
+    for feedback in all_feedback:
+        user = feedback.user
+        full_name = f"{user.FirstName} {user.LastName}" if user else 'неизвестен'
+        
+        # Конвертиране към българска часова зона
+        # Приемаме че CreatedAt е в UTC и го конвертираме към българско време
+        bg_time = feedback.CreatedAt.replace(tzinfo=timezone.utc).astimezone(BULGARIA_TZ)
+        formatted_date = bg_time.strftime('%d.%m.%Y %H:%M')
+        
+        feedback_list.append({
+            'ID': feedback.ID,
+            'UserID': feedback.UserID,
+            'Username': full_name,
+            'Email': user.Email if user else '',
+            'Rating': feedback.Rating,
+            'Comment': feedback.Comment,
+            'CreatedAt': formatted_date
+        })
+
+    return render_template('admin_feedback.html', feedbacks=feedback_list)
