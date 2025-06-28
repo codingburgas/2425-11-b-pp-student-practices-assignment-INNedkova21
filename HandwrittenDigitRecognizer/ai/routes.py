@@ -1,19 +1,19 @@
-import base64
-import os
-from io import BytesIO
-import numpy as np
-from flask import render_template, flash, redirect, url_for, jsonify
-from werkzeug.utils import secure_filename
-from PIL import Image
-from scipy.ndimage import center_of_mass, shift, binary_dilation
-from . import ai
-from datetime import datetime
-from flask import send_from_directory, abort
+from flask import render_template, request, redirect, url_for, flash, send_from_directory, jsonify, abort
 from flask_login import current_user, login_required
-import pickle
-from ..extensions import db
+from werkzeug.utils import secure_filename
 from ..models.prediction import Prediction
 from ..models.user import User
+from ..extensions import db
+from . import ai
+import os
+import numpy as np
+from PIL import Image
+from scipy.ndimage import center_of_mass, shift
+from scipy.ndimage import binary_dilation
+from datetime import datetime
+import base64
+from io import BytesIO
+import pickle
 
 # Get the root directory of the project
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -247,7 +247,8 @@ def history():
         author_email = user.Email if user else "Unknown"
         user_id = user.ID if user else None
 
-        upload_time_str = prediction.CreatedAt.strftime('%Y-%m-%d %H:%M')
+        # Форматиране на датата в български формат
+        upload_time_str = prediction.CreatedAt.strftime('%d.%m.%Y %H:%M')
         upload_time_dt = prediction.CreatedAt
 
         images.append({
@@ -291,8 +292,6 @@ def download_image(filename):
 
     abort(404)  # File not found
 
-
-from flask import request
 
 @ai.route('/delete/<filename>', methods=['POST'])
 @login_required

@@ -7,6 +7,7 @@ from ..models.prediction import Prediction
 from ..extensions import db
 from . import users
 import os
+from datetime import datetime
 
 upload_folder = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'uploads')
 
@@ -22,7 +23,9 @@ def profile():
         new_password = request.form.get('new_password')
         confirm_password = request.form.get('confirm_password')
 
-        if not check_password_hash(current_user.Password, current_password):
+        if not current_password or not new_password or not confirm_password:
+            error = "Всички полета са задължителни."
+        elif not check_password_hash(current_user.Password, current_password):
             error = "Текущата парола е грешна."
         elif new_password != confirm_password:
             error = "Новата парола не съвпада с потвърждението."
@@ -96,6 +99,10 @@ def feedback():
         rating = request.form.get('rating')
         comment = request.form.get('comment')
 
+        if not rating:
+            flash('Моля, изберете оценка.', 'error')
+            return redirect(url_for('users.feedback'))
+
         feedback = Feedback(UserID=current_user.ID, Rating=int(rating), Comment=comment)
         db.session.add(feedback)
         db.session.commit()
@@ -111,4 +118,44 @@ def admin_feedback():
         abort(403)
 
     all_feedback = Feedback.query.order_by(Feedback.CreatedAt.desc()).all()
-    return render_template('admin_feedback.html', feedbacks=all_feedback)
+    feedback_list = []
+    for feedback in all_feedback:
+        user = feedback.user
+        full_name = f"{user.FirstName} {user.LastName}" if user else 'неизвестен'
+        
+        # Форматиране на датата в български формат
+        formatted_date = feedback.CreatedAt.strftime('%d.%m.%Y %H:%M')
+        
+        feedback_list.append({
+            'ID': feedback.ID,
+            'UserID': feedback.UserID,
+            'Username': full_name,
+            'Email': user.Email if user else '',
+            'Rating': feedback.Rating,
+            'Comment': feedback.Comment,
+            'CreatedAt': formatted_date
+        })
+
+    return render_template('admin_feedback.html', feedbacks=feedback_list)
+
+
+@users.route('/delete_feedback/<int:feedback_id>', methods=['DELETE'])
+@login_required
+def delete_feedback(feedback_id):
+    print(f"DELETE FEEDBACK CALLED: {feedback_id}")  # Debug print
+    if current_user.Role != 'Administrator':
+        print("NOT ADMIN")  # Debug print
+        return jsonify({'success': False, 'error': 'Нямате права за тази операция'})
+
+    feedback = Feedback.query.get_or_404(feedback_id)
+    print(f"FEEDBACK FOUND: {feedback.ID}")  # Debug print
+    
+    try:
+        db.session.delete(feedback)
+        db.session.commit()
+        print("FEEDBACK DELETED SUCCESSFULLY")  # Debug print
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        print(f"ERROR DELETING FEEDBACK: {e}")  # Debug print
+        return jsonify({'success': False, 'error': str(e)})

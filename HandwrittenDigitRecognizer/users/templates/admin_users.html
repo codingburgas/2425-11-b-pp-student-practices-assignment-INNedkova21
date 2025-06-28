@@ -68,7 +68,7 @@
                                 {{ user.Role }}
                             </span>
                         </td>
-                        <td>{{ user.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>{{ user.CreatedAt.strftime('%d.%m.%Y %H:%M') }}</td>
                         <td>
                             <div class="action-buttons">
                                 <a href="{{ url_for('users.admin_user_details', user_id=user.ID) }}" class="view-btn">

@@ -1,30 +1,198 @@
 {% extends "base.html" %}
+
+{% block title %}Управление на обратна връзка{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Обратна връзка от потребители</h2>
-    {% if feedbacks %}
-        <table class="table table-bordered mt-3">
-            <thead>
-                <tr>
-                    <th>Потребител</th>
-                    <th>Оценка</th>
-                    <th>Коментар</th>
-                    <th>Дата</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for fb in feedbacks %}
-                <tr>
-                    <td>{{ fb.user.Username }}</td>
-                    <td>{{ fb.Rating }}</td>
-                    <td>{{ fb.Comment or '---' }}</td>
-                    <td>{{ fb.CreatedAt.strftime('%d.%m.%Y %H:%M') }}</td>
-                </tr>
+<link rel="stylesheet" href="{{ url_for('users.static', filename='admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('users.static', filename='admin_feedback.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="admin-container">
+    <div class="admin-card">
+        <h1 class="admin-title">Управление на обратна връзка</h1>
+        <p class="admin-subtitle">
+            Преглед и анализ на обратната връзка от потребителите на системата
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        <i class="fas fa-{% if category == 'success' %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                        {{ message }}
+                    </div>
                 {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>Все още няма обратна връзка.</p>
-    {% endif %}
+            {% endif %}
+        {% endwith %}
+
+        {% if feedbacks %}
+            <!-- Статистики -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number">{{ feedbacks|length }}</div>
+                    <div class="stat-label">Общо отзиви</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ "%.1f"|format(feedbacks|map(attribute='Rating')|sum / feedbacks|length) }}</div>
+                    <div class="stat-label">Средна оценка</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ feedbacks|selectattr('Rating', '>=', 4)|list|length }}</div>
+                    <div class="stat-label">Положителни (4-5)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ feedbacks|selectattr('Rating', '<=', 3)|list|length }}</div>
+                    <div class="stat-label">Отрицателни (1-3)</div>
+                </div>
+            </div>
+
+            <!-- Графики -->
+            <div class="charts-container">
+                <div class="chart-card">
+                    <h3 class="chart-title">Разпределение на оценките</h3>
+                    <canvas id="ratingChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Таблица с отзиви -->
+            <div style="overflow-x: auto;">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Потребител</th>
+                            <th>Оценка</th>
+                            <th>Коментар</th>
+                            <th>Дата</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fb in feedbacks %}
+                        <tr>
+                            <td>
+                                <div class="user-info">
+                                    <div class="user-name">{{ fb.Username }}</div>
+                                    <div class="user-id">{{ fb.Email }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="rating-display">
+                                    <span class="rating-stars">
+                                        {% for i in range(5) %}
+                                            <i class="fas fa-star {% if i < fb.Rating %}star-filled{% endif %}"></i>
+                                        {% endfor %}
+                                    </span>
+                                    <span class="rating-number">({{ fb.Rating }}/5)</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="comment-text">
+                                    {% if fb.Comment %}
+                                        {{ fb.Comment[:100] }}{% if fb.Comment|length > 100 %}...{% endif %}
+                                    {% else %}
+                                        <span class="no-comment">Няма коментар</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>{{ fb.CreatedAt }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button onclick="deleteFeedback({{ fb.ID }})" class="delete-btn">
+                                        <i class="fas fa-trash"></i>
+                                        Изтрий
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <h3>Все още няма обратна връзка</h3>
+                <p>Когато потребителите започнат да оставят отзиви, те ще се появят тук.</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
+
+<script>
+
+const feedbackData = {{ feedbacks|tojson|safe }};
+
+const ratingCtx = document.getElementById('ratingChart').getContext('2d');
+const ratingCounts = {};
+for (let i = 1; i <= 5; i++) {
+    ratingCounts[i] = feedbackData.filter(fb => fb.Rating === i).length;
+}
+
+new Chart(ratingCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['1★', '2★', '3★', '4★', '5★'],
+        datasets: [{
+            data: Object.values(ratingCounts),
+            backgroundColor: [
+                '#ff6b6b',
+                '#ffa726',
+                '#ffd54f',
+                '#66bb6a',
+                '#42a5f5'
+            ],
+            borderWidth: 3,
+            borderColor: 'rgba(255, 255, 255, 0.3)'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: {
+                    color: 'white',
+                    font: {
+                        size: 11
+                    },
+                    padding: 10,
+                    usePointStyle: true
+                }
+            }
+        }
+    }
+});
+
+function deleteFeedback(feedbackId) {
+    if (confirm('Сигурни ли сте, че искате да изтриете този отзив? Това действие не може да бъде отменено.')) {
+        fetch(`/users/delete_feedback/${feedbackId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(async response => {
+            const text = await response.text();
+            try {
+                const data = JSON.parse(text);
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Грешка при изтриването: ' + data.error);
+                }
+            } catch (e) {
+                console.log('Отговорът не е JSON:', text);
+                alert('Грешка при изтриването: ' + text);
+            }
+        })
+        .catch(error => {
+            console.error('Грешка:', error);
+            alert('Грешка при изтриването: ' + error);
+        });
+    }
+}
+</script>
 {% endblock %}

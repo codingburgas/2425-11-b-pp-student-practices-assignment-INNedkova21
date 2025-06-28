@@ -12,7 +12,7 @@ class User(UserMixin, db.Model):
     FirstName = db.Column(db.String(50), nullable=False)
     LastName = db.Column(db.String(50), nullable=False)
     Email = db.Column(db.String(120), unique=True, nullable=False)
-    Password = db.Column(db.String(120), nullable=False)
+    Password = db.Column(db.String(255), nullable=False)
     Role = db.Column(db.String(120), nullable=False, default='User')
     Confirmed = db.Column(db.Boolean, nullable=False, default=False)
     CreatedAt = db.Column(db.DateTime, default=datetime.utcnow)
