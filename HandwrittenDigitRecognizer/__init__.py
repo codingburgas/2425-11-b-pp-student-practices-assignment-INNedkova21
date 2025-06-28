@@ -7,6 +7,7 @@ from HandwrittenDigitRecognizer.extensions import db, login_manager, mail
 from HandwrittenDigitRecognizer.main.routes import main
 from HandwrittenDigitRecognizer.auth import auth
 from HandwrittenDigitRecognizer.models.user import User
+from .feedback import feedback
 from .models.feedback import Feedback
 
 def create_app(config_class=Config):
@@ -25,6 +26,7 @@ def create_app(config_class=Config):
     app.register_blueprint(ai)
     app.register_blueprint(errors)
     app.register_blueprint(users)
+    app.register_blueprint(feedback)
 
     with app.app_context():
         db.create_all()
