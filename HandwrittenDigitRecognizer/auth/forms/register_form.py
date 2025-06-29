@@ -10,5 +10,4 @@ class RegisterForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Парола', validators=[DataRequired()])
     confirm_password = PasswordField('Потвърдете паролата', validators=[DataRequired(), EqualTo('password')])
-    role = RadioField('Роля', choices=[('User', 'Потребител'), ('Admin', 'Администратор')], default='User', validators=[DataRequired()])
     submit = SubmitField('Регистрация')
