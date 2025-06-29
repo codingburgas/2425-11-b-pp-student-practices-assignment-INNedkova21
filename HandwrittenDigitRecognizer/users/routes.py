@@ -68,55 +68,24 @@ def admin_user_details(user_id):
     return render_template('admin_user_details.html', user=user, predictions=predictions)
 
 
-@users.route('/delete_user/<int:user_id>', methods=['POST'])
+@users.route('/admin/delete_user/<int:user_id>', methods=['POST'])
 @login_required
 def delete_user(user_id):
     if current_user.Role != 'Administrator':
         abort(403)
 
-    user_to_delete = User.query.get_or_404(user_id)
+    user = User.query.get_or_404(user_id)
 
-    if user_to_delete.ID == current_user.ID:
-        flash('Не можеш да изтриеш собствения си акаунт!', 'warning')
-        return redirect(url_for('users.admin_users'))
+    Feedback.query.filter_by(UserID=user.ID).delete()
+
+    Prediction.query.filter_by(UserID=user.ID).delete()
 
     try:
-        Prediction.query.filter_by(UserID=user_to_delete.ID).delete()
-        db.session.delete(user_to_delete)
+        db.session.delete(user)
         db.session.commit()
-        flash('Потребителят беше успешно изтрит.', 'success')
+        flash('Потребителят беше изтрит успешно.', 'success')
     except Exception as e:
         db.session.rollback()
-        flash('Грешка при изтриването: ' + str(e), 'danger')
+        flash(f'Грешка при изтриване: {e}', 'danger')
 
     return redirect(url_for('users.admin_users'))
-
-
-@users.route('/admin/feedback', endpoint='admin_feedback')
-@login_required
-def admin_feedback():
-    if current_user.Role != 'Administrator':
-        abort(403)
-
-    all_feedback = Feedback.query.order_by(Feedback.CreatedAt.desc()).all()
-    feedback_list = []
-    for feedback in all_feedback:
-        user = feedback.user
-        full_name = f"{user.FirstName} {user.LastName}" if user else 'неизвестен'
-        
-        # Конвертиране към българска часова зона
-        # Приемаме че CreatedAt е в UTC и го конвертираме към българско време
-        bg_time = feedback.CreatedAt.replace(tzinfo=timezone.utc).astimezone(BULGARIA_TZ)
-        formatted_date = bg_time.strftime('%d.%m.%Y %H:%M')
-        
-        feedback_list.append({
-            'ID': feedback.ID,
-            'UserID': feedback.UserID,
-            'Username': full_name,
-            'Email': user.Email if user else '',
-            'Rating': feedback.Rating,
-            'Comment': feedback.Comment,
-            'CreatedAt': formatted_date
-        })
-
-    return render_template('admin_feedback.html', feedbacks=feedback_list)

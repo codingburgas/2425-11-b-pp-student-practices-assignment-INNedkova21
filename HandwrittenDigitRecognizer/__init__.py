@@ -23,10 +23,10 @@ def create_app(config_class=Config):
     # Register blueprints
     app.register_blueprint(main)
     app.register_blueprint(auth)
-    app.register_blueprint(ai)
+    app.register_blueprint(ai, url_prefix='/ai')
     app.register_blueprint(errors)
-    app.register_blueprint(users)
-    app.register_blueprint(feedback)
+    app.register_blueprint(users, url_prefix='/users')
+    app.register_blueprint(feedback, url_prefix='/feedback')
 
     with app.app_context():
         db.create_all()

@@ -168,7 +168,7 @@ new Chart(ratingCtx, {
 
 function deleteFeedback(feedbackId) {
     if (confirm('Сигурни ли сте, че искате да изтриете този отзив? Това действие не може да бъде отменено.')) {
-        fetch(`/users/delete_feedback/${feedbackId}`, {
+        fetch(`/feedback/delete_feedback/${feedbackId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
