@@ -9,45 +9,119 @@ np.random.seed(42)
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 
 # Make the images flat (28x28 -> 784) and normalize pixel values (0–255 -> 0–1)
-x_train = x_train.reshape(-1, 28*28) / 255.0
-x_test = x_test.reshape(-1, 28*28) / 255.0
+x_train = x_train.reshape(-1, 28 * 28) / 255.0
+x_test = x_test.reshape(-1, 28 * 28) / 255.0
 
-# Turn labels (0 to 9) into one-hot vectors like [0,0,1,0,0,...]
+
 def one_hot(y, num_classes=10):
+    """
+    Convert labels (like 3 or 7) into one-hot vectors.
+    For example, 3 becomes [0, 0, 0, 1, 0, 0, 0, 0, 0, 0]
+
+    Args:
+        y: Array of labels.
+        num_classes: Total number of classes (default is 10 for digits 0–9).
+
+    Returns:
+        One-hot encoded numpy array.
+    """
     return np.eye(num_classes)[y]
+
 
 # Apply one-hot to training and test labels
 y_train_oh = one_hot(y_train)
 y_test_oh = one_hot(y_test)
 
-# Activation function: Leaky ReLU (allows small values when x < 0)
-def leaky_relu(x, alpha=0.01): return np.where(x > 0, x, alpha * x)
 
-# Derivative of Leaky ReLU (used for learning)
-def leaky_relu_deriv(x, alpha=0.01): return np.where(x > 0, 1, alpha)
+def leaky_relu(x, alpha=0.01):
+    """
+    Leaky ReLU activation function.
+    It allows small values when input is negative, to avoid dead neurons.
 
-# Softmax function: turns numbers into probabilities that add up to 1
+    Args:
+        x: Input numpy array.
+        alpha: Slope for negative values (default 0.01).
+
+    Returns:
+        Activated output.
+    """
+    return np.where(x > 0, x, alpha * x)
+
+
+def leaky_relu_deriv(x, alpha=0.01):
+    """
+    Derivative of Leaky ReLU used during backpropagation.
+
+    Args:
+        x: Input numpy array.
+        alpha: Slope for negative values.
+
+    Returns:
+        Derivative of the activation.
+    """
+    return np.where(x > 0, 1, alpha)
+
+
 def softmax(x):
-    e_x = np.exp(x - np.max(x, axis=1, keepdims=True))  # make it stable
+    """
+    Softmax function converts raw scores into probabilities that sum to 1.
+
+    Args:
+        x: 2D array of raw scores.
+
+    Returns:
+        Probabilities as a 2D numpy array.
+    """
+    e_x = np.exp(x - np.max(x, axis=1, keepdims=True))  # For numerical stability
     return e_x / np.sum(e_x, axis=1, keepdims=True)
 
-# Cross-entropy loss: shows how wrong the prediction is
-def cross_entropy(pred, y_true):
-    m = y_true.shape[0]
-    return -np.sum(y_true * np.log(pred + 1e-9)) / m  # avoid log(0)
 
-# Accuracy: how many predictions are correct
+def cross_entropy(pred, y_true):
+    """
+    Cross-entropy loss measures how well predictions match the true labels.
+
+    Args:
+        pred: Predicted probabilities.
+        y_true: True one-hot encoded labels.
+
+    Returns:
+        Average loss value.
+    """
+    m = y_true.shape[0]
+    return -np.sum(y_true * np.log(pred + 1e-9)) / m  # Add small value to avoid log(0)
+
+
 def accuracy(pred, y_true):
+    """
+    Calculates the percentage of correct predictions.
+
+    Args:
+        pred: Predicted probabilities.
+        y_true: True one-hot encoded labels.
+
+    Returns:
+        Accuracy as a float between 0 and 1.
+    """
     return np.mean(np.argmax(pred, axis=1) == np.argmax(y_true, axis=1))
 
-# Create small random weights and zero biases for each layer
+
 def init_weights(sizes):
+    """
+    Initializes weights and biases for each layer in the network.
+
+    Args:
+        sizes: List of layer sizes, e.g., [784, 128, 64, 10]
+
+    Returns:
+        List of tuples (W, b) for each layer.
+    """
     params = []
     for i in range(len(sizes) - 1):
-        W = np.random.randn(sizes[i], sizes[i+1]) * 0.01
-        b = np.zeros((1, sizes[i+1]))
+        W = np.random.randn(sizes[i], sizes[i + 1]) * 0.01
+        b = np.zeros((1, sizes[i + 1]))
         params.append((W, b))
     return params
+
 
 # Define the size of each layer in the network
 sizes = [784, 128, 64, 10]
@@ -55,9 +129,9 @@ params = init_weights(sizes)
 (W1, b1), (W2, b2), (W3, b3) = params
 
 # Set training parameters
-epochs = 20          # number of full passes through the data
-lr = 0.05            # learning rate
-batch_size = 64      # how many samples to train at once
+epochs = 20  # number of full passes through the data
+lr = 0.05  # learning rate
+batch_size = 64  # how many samples to train at once
 
 # Training the neural network
 for epoch in range(epochs):
@@ -68,8 +142,8 @@ for epoch in range(epochs):
 
     # Train in small batches
     for i in range(0, x_train.shape[0], batch_size):
-        x_batch = x_train_shuffled[i:i+batch_size]
-        y_batch = y_train_shuffled[i:i+batch_size]
+        x_batch = x_train_shuffled[i:i + batch_size]
+        y_batch = y_train_shuffled[i:i + batch_size]
 
         # ---- Forward pass (make predictions) ----
         z1 = x_batch @ W1 + b1
