@@ -31,7 +31,7 @@
 #### 🗄️ Настройки на базата данни:
 
 ```python
-    DRIVER = "ODBC Driver 17 for SQL Server"  # Уверете се, че драйверът е инсталиран
+    DRIVER = "ODBC Driver 17 for SQL Server"  # Уверете се, че драйвърът е инсталиран
     SERVER = "ИМЕТО_НА_ВАШАТА_МАШИНА\\SQLEXPRESS"  # напр. "DESKTOP-XXXX\\SQLEXPRESS"
     DATABASE = "DigitRecognizerDB"
 ```
