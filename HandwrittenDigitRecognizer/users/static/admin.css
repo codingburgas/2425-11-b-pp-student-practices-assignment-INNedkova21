@@ -282,11 +282,9 @@
 }
 
 .user-delete-btn:hover {
+    background: #d32f2f;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-    background: linear-gradient(135deg, #b91c1c, #991b1b);
-    color: white;
-    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4);
 }
 
 .current-user-badge {
@@ -421,6 +419,29 @@
     box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
     color: white;
     text-decoration: none;
+}
+
+.make-admin-btn {
+    background: linear-gradient(135deg, #ff9800, #ffb74d);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    margin: 2px;
+}
+
+.make-admin-btn:hover {
+    background: #f57c00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(245, 124, 0, 0.4);
 }
 
 /* Responsive design */

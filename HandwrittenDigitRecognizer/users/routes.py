@@ -86,3 +86,25 @@ def delete_user(user_id):
         flash(f'Грешка при изтриване: {e}', 'danger')
 
     return redirect(url_for('users.admin_users'))
+
+
+@users.route('/admin/make_admin/<int:user_id>', methods=['POST'])
+@login_required
+def make_admin(user_id):
+    if current_user.Role != 'Administrator':
+        abort(403)
+
+    user = User.query.get_or_404(user_id)
+    
+    if user.Role == 'Administrator':
+        flash('Потребителят вече е администратор.', 'error')
+    else:
+        user.Role = 'Administrator'
+        try:
+            db.session.commit()
+            flash(f'Потребителят {user.FirstName} {user.LastName} беше направен администратор успешно.', 'success')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Грешка при промяната на ролята: {e}', 'error')
+
+    return redirect(url_for('users.admin_users'))
