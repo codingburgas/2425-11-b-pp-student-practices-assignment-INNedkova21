@@ -21,7 +21,7 @@ class Config:
     MAIL_PORT = 587
     MAIL_USE_TLS = True
     MAIL_USERNAME = 'ivasla07@gmail.com'
-    MAIL_PASSWORD = 'xjtxkmnjnqbcvvuy'
+    MAIL_PASSWORD = ''
     MAIL_DEFAULT_SENDER = MAIL_USERNAME
 
 class TestingConfig(Config):

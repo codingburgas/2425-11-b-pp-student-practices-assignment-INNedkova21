@@ -18,32 +18,29 @@ BULGARIA_TZ = timezone(timedelta(hours=2))
 @users.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    error = None
-    success = None
-
     if request.method == 'POST':
         current_password = request.form.get('current_password')
         new_password = request.form.get('new_password')
         confirm_password = request.form.get('confirm_password')
 
         if not current_password or not new_password or not confirm_password:
-            error = "Всички полета са задължителни."
+            flash("Всички полета са задължителни.", "error")
         elif not check_password_hash(current_user.Password, current_password):
-            error = "Текущата парола е грешна."
+            flash("Текущата парола е грешна.", "error")
         elif new_password != confirm_password:
-            error = "Новата парола не съвпада с потвърждението."
+            flash("Новата парола не съвпада с потвърждението.", "error")
         elif len(new_password) < 6:
-            error = "Паролата трябва да е поне 6 символа."
+            flash("Паролата трябва да е поне 6 символа.", "error")
         else:
             current_user.Password = generate_password_hash(new_password)
             try:
                 db.session.commit()
-                success = "Паролата е сменена успешно."
+                flash("Паролата е сменена успешно.", "success")
             except:
                 db.session.rollback()
-                error = "Възникна грешка при смяната на паролата."
+                flash("Възникна грешка при смяната на паролата.", "error")
 
-    return render_template('profile.html', error=error, success=success)
+    return render_template('profile.html')
 
 
 @users.route('/admin/users')
